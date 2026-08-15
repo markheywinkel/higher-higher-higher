@@ -19,6 +19,11 @@ export function showButtonScreen(
   button: FractionalButton,
   onActivate: () => void,
 ): void {
+  // Objekte mit scrollFactor(0) sitzen zwar fix im Bildschirm, werden aber weiterhin vom
+  // Kamera-Zoom skaliert – ohne Reset würde der Vollbild-Screen mitgezoomt und beschnitten.
+  scene.cameras.main.setZoom(1);
+  scene.cameras.main.stopFollow();
+
   scene.add
     .image(GAME_WIDTH / 2, GAME_HEIGHT / 2, imageKey)
     .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)

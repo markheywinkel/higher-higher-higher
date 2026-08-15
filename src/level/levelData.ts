@@ -27,56 +27,60 @@ const Y = LEVEL_Y_OFFSET;
 export const PLAYER_START = { x: 110 + X, y: 600 + Y };
 
 /**
- * Plattform 1 (p0) ist die lange Startplattform.
- * Plattformen 1–5 (p0–p4): keine Gegner.
- * Plattformen 6–9 (p5–p8): nur Watschler.
- * Ab Plattform 10 (p9): weitere Gegnertypen kommen nach und nach dazu.
+ * Sanfte Einführung, bevor der erste Gegner kommt:
+ *  p0 – lange Startplattform.
+ *  p1 – einfacher Sprung auf eine weitere lange Plattform. Kein Gegner.
+ *  p2 – Sprung mit Anlauf auf eine kleinere Plattform. Kein Gegner.
+ *  p3 – nur per Wandsprung (Kamin w0/w1) erreichbar. Kein Gegner.
+ *  p4 – erster Gegner (Watschler), Plattform bewusst wieder größer.
+ * Ab dort erst nur Watschler, später kommt vereinzelt der Sprinter dazu
+ * (siehe GROUND_ENEMIES). Supersprinter und Flug-Gegner sind aktuell nicht
+ * platziert – das Spiel war insgesamt zu schwer.
  */
 export const PLATFORMS: PlatformDef[] = [
   { id: "p0", type: "solid", x: 110 + X, y: 670 + Y, material: "stone", widthOverride: 420 },
-  { id: "p1", type: "solid", x: 300 + X, y: 590 + Y, material: "wood" },
-  { id: "p2", type: "falling", x: 120 + X, y: 510 + Y },
-  { id: "p3", type: "solid", x: 340 + X, y: 430 + Y, material: "stone" },
-  { id: "p4", type: "moving-h", x: 90 + X, y: 350 + Y, range: 140, speed: 70 },
-  { id: "p5", type: "solid", x: 350 + X, y: 270 + Y, material: "wood" },
-  { id: "p6", type: "falling", x: 180 + X, y: 190 + Y },
-  { id: "p7", type: "moving-v", x: 380 + X, y: 120 + Y, range: 90, speed: 55 },
-  { id: "p8", type: "solid", x: 170 + X, y: -60 + Y, material: "stone" },
-  { id: "p9", type: "moving-h", x: 380 + X, y: -140 + Y, range: 120, speed: 75 },
-  { id: "p10", type: "solid", x: 150 + X, y: -220 + Y, material: "wood" },
-  { id: "p11", type: "falling", x: 350 + X, y: -300 + Y },
-  { id: "p12", type: "moving-v", x: 120 + X, y: -380 + Y, range: 100, speed: 60 },
-  { id: "p13", type: "solid", x: 340 + X, y: -460 + Y, material: "stone" },
-  { id: "p14", type: "solid", x: 160 + X, y: -540 + Y, material: "wood" },
-  { id: "p15", type: "solid", x: 240 + X, y: -700 + Y, material: "stone" },
+  { id: "p1", type: "solid", x: 190 + X, y: 600 + Y, material: "wood", widthOverride: 300 },
+  { id: "p2", type: "solid", x: 440 + X, y: 530 + Y, material: "stone", widthOverride: 170 },
+  { id: "p3", type: "solid", x: 400 + X, y: 370 + Y, material: "wood", widthOverride: 140 },
+  { id: "p4", type: "solid", x: 200 + X, y: 290 + Y, material: "stone", widthOverride: 200 },
+  { id: "p5", type: "solid", x: 20 + X, y: 210 + Y, material: "wood" },
+  { id: "p6", type: "solid", x: 240 + X, y: 130 + Y, material: "stone" },
+  { id: "p7", type: "moving-h", x: -10 + X, y: 50 + Y, range: 140, speed: 70 },
+  { id: "p8", type: "solid", x: 250 + X, y: -30 + Y, material: "wood" },
+  { id: "p9", type: "solid", x: 80 + X, y: -110 + Y, material: "wood" },
+  { id: "p10", type: "moving-v", x: 280 + X, y: -180 + Y, range: 90, speed: 55 },
+  { id: "p11", type: "solid", x: 70 + X, y: -360 + Y, material: "stone" },
+  { id: "p12", type: "moving-h", x: 280 + X, y: -440 + Y, range: 120, speed: 75 },
+  { id: "p13", type: "solid", x: 50 + X, y: -520 + Y, material: "wood" },
+  { id: "p14", type: "solid", x: 250 + X, y: -600 + Y, material: "stone" },
+  { id: "p15", type: "moving-v", x: 20 + X, y: -680 + Y, range: 100, speed: 60 },
+  { id: "p16", type: "solid", x: 240 + X, y: -760 + Y, material: "stone" },
+  { id: "p17", type: "solid", x: 60 + X, y: -840 + Y, material: "wood" },
+  { id: "p18", type: "solid", x: 200 + X, y: -930 + Y, material: "stone" },
 ];
 
-export const GOAL_PLATFORM_ID = "p15";
+export const GOAL_PLATFORM_ID = "p18";
 
-/** Enges Wandsprung-Kamin zwischen p7 und p8 – Aufstieg nur per Wandsprung möglich. */
+/** Zwei Wandsprung-Kamine: einer als Einführung (p2→p3), einer später (p10→p11). */
 export const WALLS: WallDef[] = [
-  { id: "w0", x: 130 + X, y: 20 + Y },
-  { id: "w1", x: 210 + X, y: 20 + Y },
+  { id: "w0", x: 360 + X, y: 450 + Y },
+  { id: "w1", x: 440 + X, y: 450 + Y },
+  { id: "w2", x: 150 + X, y: -270 + Y },
+  { id: "w3", x: 230 + X, y: -270 + Y },
 ];
 
+// Supersprinter vorerst draußen (Sprung-Verfolgung ist der schwerste Gegnertyp) –
+// das Spiel war insgesamt zu schwer. Erst Watschler, Sprinter kommt erst spät dazu.
 export const GROUND_ENEMIES: GroundEnemyDef[] = [
-  { type: "waddler", platformId: "p5" },
+  { type: "waddler", platformId: "p4" },
   { type: "waddler", platformId: "p6" },
-  { type: "waddler", platformId: "p7" },
   { type: "waddler", platformId: "p8" },
-  { type: "sprinter", platformId: "p9" },
-  { type: "waddler", platformId: "p10" },
-  { type: "super-sprinter", platformId: "p12" },
+  { type: "waddler", platformId: "p11" },
   { type: "sprinter", platformId: "p13" },
+  { type: "sprinter", platformId: "p16" },
+  { type: "waddler", platformId: "p17" },
 ];
 
-export const FLYING_ENEMIES: FlyingEnemyDef[] = [
-  // Zwischen p9 und p10 – erster Flatterer, taucht erst nach den reinen Watschler-Plattformen auf.
-  { type: "flutterer", path: { axis: "x", from: 920, to: 1050, cross: 180 } },
-  // Zwischen p11 und p12.
-  { type: "flutterer", path: { axis: "x", from: 900, to: 1010, cross: 20 } },
-  // Zwischen p13 und p14 – anspruchsvollerer Superflatterer.
-  { type: "super-flutterer", path: { axis: "x", from: 920, to: 1010, cross: -140 } },
-  // Kurz vor dem Ziel (p14/p15).
-  { type: "super-flutterer", path: { axis: "x", from: 900, to: 1000, cross: -260 } },
-];
+// Flug-Gegner (Flatterer/Superflatterer) sind vorerst deaktiviert – das Spiel war
+// insgesamt zu schwer. Mechanik/Code bleibt vorhanden, hier nur keine Platzierungen.
+export const FLYING_ENEMIES: FlyingEnemyDef[] = [];

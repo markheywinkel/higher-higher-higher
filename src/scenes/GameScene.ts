@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { loadSprites, loadGameOverScreen, createAnimations } from "../assets";
+import { loadSprites, loadGameOverScreen, loadWinScreen, loadBackground, createAnimations } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
 import { Player, type PlayerInput } from "../entities/Player";
 import { SolidPlatform } from "../entities/platforms/SolidPlatform";
@@ -23,9 +23,11 @@ import {
 } from "../level/levelData";
 import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y, LAVA_Y, DEPTH } from "../config/constants";
 
-const WORLD_TOP = -540;
+const WORLD_TOP = -760;
 const WORLD_BOTTOM = GAME_HEIGHT + 200;
 const GAMEOVER_BUTTON = { xFrac: 0.508, yFrac: 0.71, widthFrac: 0.353, heightFrac: 0.165 };
+const WIN_BUTTON = { xFrac: 0.495, yFrac: 0.9166, widthFrac: 0.326, heightFrac: 0.1435 };
+const CAMERA_ZOOM = 2.25;
 
 type RunState = "playing" | "gameover" | "win";
 
@@ -36,8 +38,6 @@ export class GameScene extends Phaser.Scene {
   private keyD!: Phaser.Input.Keyboard.Key;
   private keyShift!: Phaser.Input.Keyboard.Key;
   private keySpace!: Phaser.Input.Keyboard.Key;
-  private keyR!: Phaser.Input.Keyboard.Key;
-  private keyEnter!: Phaser.Input.Keyboard.Key;
 
   private staticPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private movingPlatforms!: Phaser.Physics.Arcade.Group;
@@ -49,8 +49,6 @@ export class GameScene extends Phaser.Scene {
 
   private playerCurrentPlatformId: string | null = null;
   private runState: RunState = "playing";
-  private statusSign!: Phaser.GameObjects.Image;
-  private statusText!: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameScene");
@@ -59,6 +57,8 @@ export class GameScene extends Phaser.Scene {
   preload(): void {
     loadSprites(this);
     loadGameOverScreen(this);
+    loadWinScreen(this);
+    loadBackground(this);
   }
 
   create(): void {
@@ -69,6 +69,7 @@ export class GameScene extends Phaser.Scene {
     this.physics.world.setBounds(0, WORLD_TOP, GAME_WIDTH, WORLD_BOTTOM - WORLD_TOP);
     this.physics.world.gravity.y = GRAVITY_Y;
 
+    this.buildBackground();
     this.buildLava();
     this.buildPlatforms();
     this.buildWalls();
@@ -81,7 +82,15 @@ export class GameScene extends Phaser.Scene {
     this.setupColliders();
     this.setupCamera();
     this.setupInput();
-    this.setupUI();
+  }
+
+  private buildBackground(): void {
+    // Vertikaler Himmel-Verlauf (Sonnenuntergang unten -> Sternenhimmel oben), damit die
+    // Kletterspur nicht in einer leeren dunklen Fläche schwebt.
+    const bg = this.add.image(GAME_WIDTH / 2, LAVA_Y, "background-sky");
+    bg.setOrigin(0.5, 1);
+    bg.setDisplaySize(GAME_WIDTH + 40, LAVA_Y - WORLD_TOP);
+    bg.setDepth(DEPTH.BACKGROUND);
   }
 
   private buildLava(): void {
@@ -262,6 +271,7 @@ export class GameScene extends Phaser.Scene {
   private setupCamera(): void {
     const cam = this.cameras.main;
     cam.setBounds(0, WORLD_TOP, GAME_WIDTH, WORLD_BOTTOM - WORLD_TOP);
+    cam.setZoom(CAMERA_ZOOM);
     cam.startFollow(this.player, true, 0.1, 0.12);
     cam.setDeadzone(40, 90);
   }
@@ -272,43 +282,11 @@ export class GameScene extends Phaser.Scene {
     this.keyD = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyShift = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     this.keySpace = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
-    this.keyR = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
-    this.keyEnter = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
-  }
-
-  /** Nur noch für den Sieg-Screen genutzt – Game Over läuft über showButtonScreen(). */
-  private setupUI(): void {
-    this.statusSign = this.add
-      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, "ui-higher-sign")
-      .setScrollFactor(0)
-      .setDepth(DEPTH.UI)
-      .setScale(1.6)
-      .setVisible(false);
-
-    this.statusText = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 70, "", {
-        fontFamily: "monospace",
-        fontSize: "20px",
-        color: "#ffffff",
-        align: "center",
-        backgroundColor: "#000000aa",
-        padding: { x: 16, y: 10 },
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(DEPTH.UI)
-      .setVisible(false);
   }
 
   update(time: number, delta: number): void {
     if (this.runState === "playing") {
       this.updatePlaying(time);
-    } else if (this.runState === "win") {
-      // Game-Over-Neustart läuft über showButtonScreen() (Klick/Enter/R); der Sieg-Screen
-      // nutzt noch das einfache Schild und braucht daher weiterhin diesen Handler.
-      if (Phaser.Input.Keyboard.JustDown(this.keyR) || Phaser.Input.Keyboard.JustDown(this.keyEnter)) {
-        this.scene.restart();
-      }
     }
     void delta;
   }
@@ -366,7 +344,6 @@ export class GameScene extends Phaser.Scene {
   private triggerWin(): void {
     this.runState = "win";
     this.physics.pause();
-    this.statusSign.setTexture("ui-higher-sign").setVisible(true);
-    this.statusText.setText("Geschafft! – R für neue Runde").setVisible(true);
+    showButtonScreen(this, "screen-win", WIN_BUTTON, () => this.scene.restart());
   }
 }

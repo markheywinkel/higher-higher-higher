@@ -48,7 +48,7 @@ const STATIC_IMAGES: Record<string, string> = {
   "ui-gameover-sign": "ui_gameover_sign.png",
 };
 
-const PLATFORM_SIZE = 2;
+const PLATFORM_SIZE = 3;
 for (const material of ["stone", "wood"]) {
   for (let size = 1; size <= 4; size++) {
     STATIC_IMAGES[`platform-solid-${material}-${size}`] = `platform_solid_${material}_${size}.png`;
@@ -81,6 +81,14 @@ export function loadStartScreen(scene: Phaser.Scene): void {
 
 export function loadGameOverScreen(scene: Phaser.Scene): void {
   scene.load.image("screen-gameover", "screens/gameover.png");
+}
+
+export function loadWinScreen(scene: Phaser.Scene): void {
+  scene.load.image("screen-win", "screens/win.png");
+}
+
+export function loadBackground(scene: Phaser.Scene): void {
+  scene.load.image("background-sky", "backgrounds/sky.png");
 }
 
 export function createAnimations(scene: Phaser.Scene): void {
