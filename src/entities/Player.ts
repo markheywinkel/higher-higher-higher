@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { PLAYER } from "../config/constants";
+import { playSfx } from "../audio";
 
 export interface PlayerInput {
   left: boolean;
@@ -102,6 +103,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       body.setVelocityY(running ? PLAYER.RUN_JUMP_VELOCITY : PLAYER.JUMP_VELOCITY);
       this.airborneAnim = running ? "capybara-run-jump" : "capybara-jump";
       this.jumpBufferedAt = -Infinity;
+      playSfx(this.scene, "sfx-jump");
     } else if (jumpBuffered && canWallJump) {
       const pushDir = this.lastWallTouch === "left" ? 1 : -1;
       body.setVelocityX(pushDir * PLAYER.WALL_JUMP_VELOCITY_X);
@@ -111,6 +113,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       this.jumpBufferedAt = -Infinity;
       this.lastWallTouch = null;
       this.setFlipX(pushDir < 0);
+      playSfx(this.scene, "sfx-jump");
     }
 
     if (!input.jumpHeld && body.velocity.y < 0) {

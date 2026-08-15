@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { loadStartScreen } from "../assets";
+import { loadStartScreen, loadAudio } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
 
 const START_BUTTON = { xFrac: 0.4995, yFrac: 0.6722, widthFrac: 0.29, heightFrac: 0.145 };
@@ -11,6 +11,7 @@ export class StartScene extends Phaser.Scene {
 
   preload(): void {
     loadStartScreen(this);
+    loadAudio(this);
   }
 
   create(): void {

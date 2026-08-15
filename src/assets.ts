@@ -91,6 +91,19 @@ export function loadBackground(scene: Phaser.Scene): void {
   scene.load.image("background-sky", "backgrounds/sky.png");
 }
 
+const AUDIO_FILES: Record<string, string> = {
+  music: "music",
+  "sfx-button": "sfx_button_druck",
+  "sfx-jump": "sfx_sprung",
+  "sfx-stomp": "sfx_sprung_auf_gegner",
+};
+
+export function loadAudio(scene: Phaser.Scene): void {
+  for (const [key, file] of Object.entries(AUDIO_FILES)) {
+    scene.load.audio(key, [`audio/${file}.mp3`, `audio/${file}.ogg`]);
+  }
+}
+
 export function createAnimations(scene: Phaser.Scene): void {
   for (const sheet of ANIM_SHEETS) {
     if (scene.anims.exists(sheet.key)) continue;

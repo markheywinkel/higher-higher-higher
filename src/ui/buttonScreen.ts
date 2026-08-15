@@ -1,5 +1,6 @@
 import Phaser from "phaser";
 import { GAME_WIDTH, GAME_HEIGHT, DEPTH } from "../config/constants";
+import { playSfx } from "../audio";
 
 /** Button-Position als Anteil (0–1) der Bildschirm-Illustration, unabhängig von der Canvas-Größe. */
 export interface FractionalButton {
@@ -51,6 +52,7 @@ export function showButtonScreen(
   const activate = () => {
     if (activated) return;
     activated = true;
+    playSfx(scene, "sfx-button");
     onActivate();
   };
 

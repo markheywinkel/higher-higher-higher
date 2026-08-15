@@ -35,7 +35,9 @@ export const PLAYER_START = { x: 110 + X, y: 600 + Y };
  *  p4 – erster Gegner (Watschler), Plattform bewusst wieder größer.
  * Ab dort erst nur Watschler, später kommt vereinzelt der Sprinter dazu
  * (siehe GROUND_ENEMIES). Supersprinter und Flug-Gegner sind aktuell nicht
- * platziert – das Spiel war insgesamt zu schwer.
+ * platziert, herabfallende und vertikal bewegte Plattformen sind aktuell
+ * durch solide ersetzt – das Spiel war insgesamt zu schwer. Mechaniken/
+ * Code bleiben erhalten, nur im aktuellen Level nicht verwendet.
  */
 export const PLATFORMS: PlatformDef[] = [
   { id: "p0", type: "solid", x: 110 + X, y: 670 + Y, material: "stone", widthOverride: 420 },
@@ -48,12 +50,12 @@ export const PLATFORMS: PlatformDef[] = [
   { id: "p7", type: "moving-h", x: -10 + X, y: 50 + Y, range: 140, speed: 70 },
   { id: "p8", type: "solid", x: 250 + X, y: -30 + Y, material: "wood" },
   { id: "p9", type: "solid", x: 80 + X, y: -110 + Y, material: "wood" },
-  { id: "p10", type: "moving-v", x: 280 + X, y: -180 + Y, range: 90, speed: 55 },
+  { id: "p10", type: "solid", x: 280 + X, y: -180 + Y, material: "stone" },
   { id: "p11", type: "solid", x: 70 + X, y: -360 + Y, material: "stone" },
   { id: "p12", type: "moving-h", x: 280 + X, y: -440 + Y, range: 120, speed: 75 },
   { id: "p13", type: "solid", x: 50 + X, y: -520 + Y, material: "wood" },
   { id: "p14", type: "solid", x: 250 + X, y: -600 + Y, material: "stone" },
-  { id: "p15", type: "moving-v", x: 20 + X, y: -680 + Y, range: 100, speed: 60 },
+  { id: "p15", type: "solid", x: 20 + X, y: -680 + Y, material: "wood" },
   { id: "p16", type: "solid", x: 240 + X, y: -760 + Y, material: "stone" },
   { id: "p17", type: "solid", x: 60 + X, y: -840 + Y, material: "wood" },
   { id: "p18", type: "solid", x: 200 + X, y: -930 + Y, material: "stone" },

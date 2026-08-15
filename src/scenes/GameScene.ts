@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { loadSprites, loadGameOverScreen, loadWinScreen, loadBackground, createAnimations } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
+import { ensureMusicPlaying, playSfx } from "../audio";
 import { Player, type PlayerInput } from "../entities/Player";
 import { SolidPlatform } from "../entities/platforms/SolidPlatform";
 import { FallingPlatform } from "../entities/platforms/FallingPlatform";
@@ -63,6 +64,7 @@ export class GameScene extends Phaser.Scene {
 
   create(): void {
     createAnimations(this);
+    ensureMusicPlaying(this);
     this.runState = "playing";
     this.playerCurrentPlatformId = null;
 
@@ -252,6 +254,7 @@ export class GameScene extends Phaser.Scene {
       enemy.stomp();
       body.setVelocityY(-320);
       this.spawnEffect(enemy.x, enemy.y, "effect-hit-stars");
+      playSfx(this, "sfx-stomp");
     } else {
       player.applyKnockback(enemy.x, this.time.now);
     }
