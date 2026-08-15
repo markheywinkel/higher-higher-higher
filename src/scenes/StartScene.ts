@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { loadStartScreen, loadAudio } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
+import { ensureMusicPlaying } from "../audio";
 
 const START_BUTTON = { xFrac: 0.4995, yFrac: 0.6722, widthFrac: 0.29, heightFrac: 0.145 };
 
@@ -15,6 +16,10 @@ export class StartScene extends Phaser.Scene {
   }
 
   create(): void {
+    // Browser blockieren Audio bis zur ersten Nutzer-Interaktion; Phaser merkt sich
+    // diesen play()-Aufruf und startet ihn automatisch, sobald z.B. der Start-Klick
+    // (oder jede andere erste Interaktion) den Sound Manager entsperrt.
+    ensureMusicPlaying(this);
     showButtonScreen(this, "screen-start", START_BUTTON, () => {
       this.scene.start("GameScene");
     });
