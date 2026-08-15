@@ -75,6 +75,14 @@ export function loadSprites(scene: Phaser.Scene): void {
   }
 }
 
+export function loadStartScreen(scene: Phaser.Scene): void {
+  scene.load.image("screen-start", "screens/start.png");
+}
+
+export function loadGameOverScreen(scene: Phaser.Scene): void {
+  scene.load.image("screen-gameover", "screens/gameover.png");
+}
+
 export function createAnimations(scene: Phaser.Scene): void {
   for (const sheet of ANIM_SHEETS) {
     if (scene.anims.exists(sheet.key)) continue;

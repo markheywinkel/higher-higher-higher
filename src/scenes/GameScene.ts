@@ -1,5 +1,6 @@
 import Phaser from "phaser";
-import { loadSprites, createAnimations } from "../assets";
+import { loadSprites, loadGameOverScreen, createAnimations } from "../assets";
+import { showButtonScreen } from "../ui/buttonScreen";
 import { Player, type PlayerInput } from "../entities/Player";
 import { SolidPlatform } from "../entities/platforms/SolidPlatform";
 import { FallingPlatform } from "../entities/platforms/FallingPlatform";
@@ -22,8 +23,9 @@ import {
 } from "../level/levelData";
 import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y, LAVA_Y, DEPTH } from "../config/constants";
 
-const WORLD_TOP = -900;
+const WORLD_TOP = -540;
 const WORLD_BOTTOM = GAME_HEIGHT + 200;
+const GAMEOVER_BUTTON = { xFrac: 0.508, yFrac: 0.71, widthFrac: 0.353, heightFrac: 0.165 };
 
 type RunState = "playing" | "gameover" | "win";
 
@@ -35,6 +37,7 @@ export class GameScene extends Phaser.Scene {
   private keyShift!: Phaser.Input.Keyboard.Key;
   private keySpace!: Phaser.Input.Keyboard.Key;
   private keyR!: Phaser.Input.Keyboard.Key;
+  private keyEnter!: Phaser.Input.Keyboard.Key;
 
   private staticPlatforms!: Phaser.Physics.Arcade.StaticGroup;
   private movingPlatforms!: Phaser.Physics.Arcade.Group;
@@ -55,6 +58,7 @@ export class GameScene extends Phaser.Scene {
 
   preload(): void {
     loadSprites(this);
+    loadGameOverScreen(this);
   }
 
   create(): void {
@@ -81,9 +85,30 @@ export class GameScene extends Phaser.Scene {
   }
 
   private buildLava(): void {
-    const lava = this.add.image(GAME_WIDTH / 2, LAVA_Y, "lava");
+    // Füllung unter der Lava-Grafik, damit beim Herunterscrollen kein Leerraum
+    // unter der Lava sichtbar wird (sie soll wirkt wie ein bodenloser Lavasee).
+    const fill = this.add.rectangle(
+      GAME_WIDTH / 2,
+      LAVA_Y + 40,
+      GAME_WIDTH + 40,
+      WORLD_BOTTOM - LAVA_Y + 40,
+      0xb23a0e,
+    );
+    fill.setOrigin(0.5, 0);
+    fill.setDepth(DEPTH.LAVA);
+
+    // TileSprite statt gestrecktem Image, damit das Lava-Muster bei der Breite
+    // von 1920px nicht verzerrt wird.
+    const lavaTexture = this.textures.get("lava").getSourceImage() as HTMLImageElement;
+    const lava = this.add.tileSprite(
+      GAME_WIDTH / 2,
+      LAVA_Y,
+      GAME_WIDTH + 40,
+      lavaTexture.height,
+      "lava",
+    );
     lava.setOrigin(0.5, 0);
-    lava.setDepth(DEPTH.LAVA);
+    lava.setDepth(DEPTH.LAVA + 1);
   }
 
   private buildPlatforms(): void {
@@ -248,11 +273,13 @@ export class GameScene extends Phaser.Scene {
     this.keyShift = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     this.keySpace = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     this.keyR = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.R);
+    this.keyEnter = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
   }
 
+  /** Nur noch für den Sieg-Screen genutzt – Game Over läuft über showButtonScreen(). */
   private setupUI(): void {
     this.statusSign = this.add
-      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, "ui-gameover-sign")
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, "ui-higher-sign")
       .setScrollFactor(0)
       .setDepth(DEPTH.UI)
       .setScale(1.6)
@@ -276,10 +303,12 @@ export class GameScene extends Phaser.Scene {
   update(time: number, delta: number): void {
     if (this.runState === "playing") {
       this.updatePlaying(time);
-    }
-
-    if (this.runState !== "playing" && Phaser.Input.Keyboard.JustDown(this.keyR)) {
-      this.scene.restart();
+    } else if (this.runState === "win") {
+      // Game-Over-Neustart läuft über showButtonScreen() (Klick/Enter/R); der Sieg-Screen
+      // nutzt noch das einfache Schild und braucht daher weiterhin diesen Handler.
+      if (Phaser.Input.Keyboard.JustDown(this.keyR) || Phaser.Input.Keyboard.JustDown(this.keyEnter)) {
+        this.scene.restart();
+      }
     }
     void delta;
   }
@@ -331,8 +360,7 @@ export class GameScene extends Phaser.Scene {
   private triggerGameOver(): void {
     this.runState = "gameover";
     this.physics.pause();
-    this.statusSign.setTexture("ui-gameover-sign").setVisible(true);
-    this.statusText.setText("R zum Neustart").setVisible(true);
+    showButtonScreen(this, "screen-gameover", GAMEOVER_BUTTON, () => this.scene.restart());
   }
 
   private triggerWin(): void {

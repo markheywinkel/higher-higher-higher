@@ -1,5 +1,10 @@
-export const GAME_WIDTH = 480;
-export const GAME_HEIGHT = 720;
+export const GAME_WIDTH = 1920;
+export const GAME_HEIGHT = 1080;
+
+/** Horizontaler Versatz der Levelgeometrie, damit die Kletterspur im breiteren Canvas zentriert bleibt. */
+export const LEVEL_X_OFFSET = 720;
+/** Vertikaler Versatz, damit der Abstand Startplattform/Lava zur neuen Canvas-Höhe passt. */
+export const LEVEL_Y_OFFSET = 360;
 
 export const GRAVITY_Y = 1000;
 

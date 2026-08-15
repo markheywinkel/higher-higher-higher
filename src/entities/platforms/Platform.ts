@@ -15,6 +15,8 @@ export interface PlatformDef {
   range?: number;
   /** Für moving-h/moving-v: Geschwindigkeit in px/s. */
   speed?: number;
+  /** Erzwingt eine abweichende Breite (Textur wird gestreckt) – z.B. für die lange Startplattform. */
+  widthOverride?: number;
 }
 
 export function resolvePlatformTexture(def: PlatformDef): string {
@@ -32,6 +34,9 @@ export class Platform extends Phaser.Physics.Arcade.Sprite {
     super(scene, def.x, def.y, resolvePlatformTexture(def));
     this.def = def;
     scene.add.existing(this);
+    if (def.widthOverride) {
+      this.setDisplaySize(def.widthOverride, this.height);
+    }
   }
 
   get leftEdge(): number {

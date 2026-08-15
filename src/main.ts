@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { StartScene } from "./scenes/StartScene";
 import { GameScene } from "./scenes/GameScene";
 import { GAME_WIDTH, GAME_HEIGHT } from "./config/constants";
 
@@ -16,7 +17,7 @@ const game = new Phaser.Game({
       debug: false,
     },
   },
-  scene: [GameScene],
+  scene: [StartScene, GameScene],
 });
 
 if (import.meta.env.DEV) {
