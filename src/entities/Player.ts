@@ -17,18 +17,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private lastWallTouchAt = -Infinity;
   private wallJumpLockedUntil = 0;
   private knockbackLockedUntil = 0;
-  /** Aktuell getragen von einer beweglichen Plattform (für seitliches Mitfahren). */
-  ridingPlatformDx = 0;
+  private airborneAnim: "capybara-jump" | "capybara-run-jump" = "capybara-jump";
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, "player");
+    super(scene, x, y, "capybara-idle", 0);
     scene.add.existing(this);
     scene.physics.add.existing(this);
 
     const body = this.body as Phaser.Physics.Arcade.Body;
     body.setSize(PLAYER.WIDTH, PLAYER.HEIGHT);
+    // Alle capybara-Animationen teilen die Zellgröße 80x85 (siehe assets.ts),
+    // daher ist ein einmaliger Offset hier sicher und muss nicht pro Frame neu
+    // berechnet werden.
+    body.setOffset((80 - PLAYER.WIDTH) / 2, 85 - PLAYER.HEIGHT);
     body.setMaxVelocity(PLAYER.RUN_SPEED + 40, 900);
     body.setDragX(PLAYER.DRAG);
+    this.play("capybara-idle");
   }
 
   get isRunning(): boolean {
@@ -94,14 +98,16 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       time - this.lastWallTouchAt < PLAYER.WALL_COYOTE_MS;
 
     if (jumpBuffered && onGround) {
-      const velocity = this.isRunning ? PLAYER.RUN_JUMP_VELOCITY : PLAYER.JUMP_VELOCITY;
-      body.setVelocityY(velocity);
+      const running = this.isRunning;
+      body.setVelocityY(running ? PLAYER.RUN_JUMP_VELOCITY : PLAYER.JUMP_VELOCITY);
+      this.airborneAnim = running ? "capybara-run-jump" : "capybara-jump";
       this.jumpBufferedAt = -Infinity;
     } else if (jumpBuffered && canWallJump) {
       const pushDir = this.lastWallTouch === "left" ? 1 : -1;
       body.setVelocityX(pushDir * PLAYER.WALL_JUMP_VELOCITY_X);
       body.setVelocityY(PLAYER.WALL_JUMP_VELOCITY_Y);
       this.wallJumpLockedUntil = time + PLAYER.WALL_JUMP_LOCK_MS;
+      this.airborneAnim = "capybara-jump";
       this.jumpBufferedAt = -Infinity;
       this.lastWallTouch = null;
       this.setFlipX(pushDir < 0);
@@ -110,5 +116,22 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     if (!input.jumpHeld && body.velocity.y < 0) {
       body.setVelocityY(body.velocity.y * 0.55);
     }
+
+    this.updateAnimation(input, onGround, time < this.wallJumpLockedUntil);
+  }
+
+  private updateAnimation(input: PlayerInput, onGround: boolean, wallLocked: boolean): void {
+    this.anims.timeScale = input.run ? 1.4 : 1;
+
+    if (wallLocked) {
+      this.play("capybara-wall-jump", true);
+      return;
+    }
+    if (!onGround) {
+      this.play(this.airborneAnim, true);
+      return;
+    }
+    const moving = input.left || input.right;
+    this.play(moving ? "capybara-walk" : "capybara-idle", true);
   }
 }

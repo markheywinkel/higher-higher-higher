@@ -10,7 +10,7 @@ export class SuperFlutterer extends Flutterer {
   private wasChasing = false;
 
   constructor(scene: Phaser.Scene, path: FluttererPath, player: Player) {
-    super(scene, path, "super-flutterer");
+    super(scene, path, "superflutterer-fly", "superflutterer-dead");
     this.player = player;
   }
 
@@ -25,6 +25,7 @@ export class SuperFlutterer extends Flutterer {
         Math.cos(angle) * ENEMY_SPEED.FLUTTERER * 1.5,
         Math.sin(angle) * ENEMY_SPEED.FLUTTERER * 1.5,
       );
+      this.setFlipX(this.player.x < this.x);
       this.wasChasing = true;
       return;
     }

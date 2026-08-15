@@ -12,6 +12,6 @@ export class Sprinter extends ChasingGroundEnemy {
   protected readonly jumpVelocityY = 0;
 
   constructor(scene: Phaser.Scene, platform: Platform, player: Player) {
-    super(scene, platform, player, "sprinter");
+    super(scene, platform, player, "sprinter-walk", "sprinter-dead");
   }
 }

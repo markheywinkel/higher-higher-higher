@@ -19,8 +19,8 @@ export const PLAYER = {
   KNOCKBACK_X: 220,
   KNOCKBACK_Y: -260,
   KNOCKBACK_LOCK_MS: 220,
-  WIDTH: 22,
-  HEIGHT: 30,
+  WIDTH: 40,
+  HEIGHT: 54,
 } as const;
 
 export const ENEMY_SPEED = {

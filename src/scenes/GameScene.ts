@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { generatePlaceholderTextures } from "../textures";
+import { loadSprites, createAnimations } from "../assets";
 import { Player, type PlayerInput } from "../entities/Player";
 import { SolidPlatform } from "../entities/platforms/SolidPlatform";
 import { FallingPlatform } from "../entities/platforms/FallingPlatform";
@@ -46,14 +46,19 @@ export class GameScene extends Phaser.Scene {
 
   private playerCurrentPlatformId: string | null = null;
   private runState: RunState = "playing";
+  private statusSign!: Phaser.GameObjects.Image;
   private statusText!: Phaser.GameObjects.Text;
 
   constructor() {
     super("GameScene");
   }
 
+  preload(): void {
+    loadSprites(this);
+  }
+
   create(): void {
-    generatePlaceholderTextures(this);
+    createAnimations(this);
     this.runState = "playing";
     this.playerCurrentPlatformId = null;
 
@@ -76,9 +81,9 @@ export class GameScene extends Phaser.Scene {
   }
 
   private buildLava(): void {
-    const lava = this.add.image(GAME_WIDTH / 2, LAVA_Y + 16, "lava");
+    const lava = this.add.image(GAME_WIDTH / 2, LAVA_Y, "lava");
+    lava.setOrigin(0.5, 0);
     lava.setDepth(DEPTH.LAVA);
-    lava.setScrollFactor(1, 0);
   }
 
   private buildPlatforms(): void {
@@ -119,7 +124,7 @@ export class GameScene extends Phaser.Scene {
   private buildGoalMarker(): void {
     const goal = this.platformsById.get(GOAL_PLATFORM_ID);
     if (!goal) return;
-    const flag = this.add.image(goal.x, goal.y - 26, "goal");
+    const flag = this.add.image(goal.x, goal.y - 45, "ui-higher-sign");
     flag.setDepth(DEPTH.PLATFORM);
   }
 
@@ -212,9 +217,21 @@ export class GameScene extends Phaser.Scene {
     if (stompedFromAbove) {
       enemy.stomp();
       body.setVelocityY(-320);
+      this.spawnEffect(enemy.x, enemy.y, "effect-hit-stars");
     } else {
       player.applyKnockback(enemy.x, this.time.now);
     }
+  }
+
+  private spawnEffect(x: number, y: number, key: string): void {
+    const fx = this.add.image(x, y, key).setDepth(DEPTH.UI);
+    this.tweens.add({
+      targets: fx,
+      alpha: 0,
+      scale: 1.3,
+      duration: 350,
+      onComplete: () => fx.destroy(),
+    });
   }
 
   private setupCamera(): void {
@@ -234,14 +251,21 @@ export class GameScene extends Phaser.Scene {
   }
 
   private setupUI(): void {
+    this.statusSign = this.add
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 20, "ui-gameover-sign")
+      .setScrollFactor(0)
+      .setDepth(DEPTH.UI)
+      .setScale(1.6)
+      .setVisible(false);
+
     this.statusText = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2, "", {
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 70, "", {
         fontFamily: "monospace",
-        fontSize: "28px",
+        fontSize: "20px",
         color: "#ffffff",
         align: "center",
         backgroundColor: "#000000aa",
-        padding: { x: 16, y: 12 },
+        padding: { x: 16, y: 10 },
       })
       .setOrigin(0.5)
       .setScrollFactor(0)
@@ -307,12 +331,14 @@ export class GameScene extends Phaser.Scene {
   private triggerGameOver(): void {
     this.runState = "gameover";
     this.physics.pause();
-    this.statusText.setText("Game Over\n\nR zum Neustart").setVisible(true);
+    this.statusSign.setTexture("ui-gameover-sign").setVisible(true);
+    this.statusText.setText("R zum Neustart").setVisible(true);
   }
 
   private triggerWin(): void {
     this.runState = "win";
     this.physics.pause();
-    this.statusText.setText("Geschafft!\n\nR für neue Runde").setVisible(true);
+    this.statusSign.setTexture("ui-higher-sign").setVisible(true);
+    this.statusText.setText("Geschafft! – R für neue Runde").setVisible(true);
   }
 }

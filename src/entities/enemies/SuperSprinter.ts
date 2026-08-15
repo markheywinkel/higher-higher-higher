@@ -12,6 +12,6 @@ export class SuperSprinter extends ChasingGroundEnemy {
   protected readonly jumpVelocityY = -430;
 
   constructor(scene: Phaser.Scene, platform: Platform, player: Player) {
-    super(scene, platform, player, "super-sprinter");
+    super(scene, platform, player, "supersprinter-run", "supersprinter-dead");
   }
 }

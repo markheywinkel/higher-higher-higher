@@ -16,10 +16,15 @@ export class Flutterer extends Enemy {
   protected direction: 1 | -1 = 1;
   protected readonly speed: number = ENEMY_SPEED.FLUTTERER;
 
-  constructor(scene: Phaser.Scene, path: FluttererPath, texture = "flutterer") {
+  constructor(
+    scene: Phaser.Scene,
+    path: FluttererPath,
+    aliveAnim = "flutterer-fly",
+    deadTexture = "flutterer-dead",
+  ) {
     const startX = path.axis === "x" ? path.from : path.cross;
     const startY = path.axis === "y" ? path.from : path.cross;
-    super(scene, startX, startY, texture, true);
+    super(scene, startX, startY, aliveAnim, deadTexture, true);
     this.path = path;
     this.applyVelocity();
   }
@@ -29,6 +34,7 @@ export class Flutterer extends Enemy {
     if (this.path.axis === "x") {
       body.setVelocityX(this.direction * this.speed);
       body.setVelocityY(0);
+      this.setFlipX(this.direction === -1);
     } else {
       body.setVelocityY(this.direction * this.speed);
       body.setVelocityX(0);

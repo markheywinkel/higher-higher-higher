@@ -20,25 +20,25 @@ export interface FlyingEnemyDef {
   path: FluttererPath;
 }
 
-export const PLAYER_START = { x: 110, y: 640 };
+export const PLAYER_START = { x: 110, y: 600 };
 
 export const PLATFORMS: PlatformDef[] = [
-  { id: "p0", type: "solid", x: 110, y: 670 },
-  { id: "p1", type: "solid", x: 300, y: 590 },
+  { id: "p0", type: "solid", x: 110, y: 670, material: "stone" },
+  { id: "p1", type: "solid", x: 300, y: 590, material: "wood" },
   { id: "p2", type: "falling", x: 120, y: 510 },
-  { id: "p3", type: "solid", x: 340, y: 430 },
+  { id: "p3", type: "solid", x: 340, y: 430, material: "stone" },
   { id: "p4", type: "moving-h", x: 90, y: 350, range: 140, speed: 70 },
-  { id: "p5", type: "solid", x: 350, y: 270 },
+  { id: "p5", type: "solid", x: 350, y: 270, material: "wood" },
   { id: "p6", type: "falling", x: 180, y: 190 },
   { id: "p7", type: "moving-v", x: 380, y: 120, range: 90, speed: 55 },
-  { id: "p8", type: "solid", x: 170, y: -60 },
+  { id: "p8", type: "solid", x: 170, y: -60, material: "stone" },
   { id: "p9", type: "moving-h", x: 380, y: -140, range: 120, speed: 75 },
-  { id: "p10", type: "solid", x: 150, y: -220 },
+  { id: "p10", type: "solid", x: 150, y: -220, material: "wood" },
   { id: "p11", type: "falling", x: 350, y: -300 },
   { id: "p12", type: "moving-v", x: 120, y: -380, range: 100, speed: 60 },
-  { id: "p13", type: "solid", x: 340, y: -460 },
-  { id: "p14", type: "solid", x: 160, y: -540 },
-  { id: "p15", type: "solid", x: 240, y: -700 },
+  { id: "p13", type: "solid", x: 340, y: -460, material: "stone" },
+  { id: "p14", type: "solid", x: 160, y: -540, material: "wood" },
+  { id: "p15", type: "solid", x: 240, y: -700, material: "stone" },
 ];
 
 export const GOAL_PLATFORM_ID = "p15";

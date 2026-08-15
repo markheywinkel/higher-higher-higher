@@ -18,8 +18,14 @@ export abstract class ChasingGroundEnemy extends Waddler {
   protected abstract readonly jumpVelocityX: number;
   protected abstract readonly jumpVelocityY: number;
 
-  constructor(scene: Phaser.Scene, platform: Platform, player: Player, texture: string) {
-    super(scene, platform, texture);
+  constructor(
+    scene: Phaser.Scene,
+    platform: Platform,
+    player: Player,
+    aliveAnim: string,
+    deadTexture: string,
+  ) {
+    super(scene, platform, aliveAnim, deadTexture);
     this.player = player;
   }
 

@@ -10,8 +10,15 @@ export class Waddler extends Enemy {
   protected readonly speed: number = ENEMY_SPEED.WADDLER;
   protected readonly margin = 4;
 
-  constructor(scene: Phaser.Scene, platform: Platform, texture = "waddler") {
-    super(scene, platform.leftEdge + 20, platform.topEdge - 12, texture, false);
+  constructor(
+    scene: Phaser.Scene,
+    platform: Platform,
+    aliveAnim = "watschler-walk",
+    deadTexture = "watschler-dead",
+  ) {
+    // Deutlicher Abstand über der Plattform: Arcade Physics löst eine Kollision, bei der der
+    // Body direkt beim Spawn schon tief in einem statischen Body steckt, nicht zuverlässig auf.
+    super(scene, platform.leftEdge + 30, platform.topEdge - 50, aliveAnim, deadTexture, false);
     this.platform = platform;
     (this.body as Phaser.Physics.Arcade.Body).setVelocityX(this.direction * this.speed);
   }
