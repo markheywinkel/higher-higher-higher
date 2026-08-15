@@ -1,0 +1,52 @@
+{
+  "capybara_idle": {
+    "frameWidth": 61,
+    "frameHeight": 72,
+    "frameCount": 3
+  },
+  "capybara_walk": {
+    "frameWidth": 75,
+    "frameHeight": 78,
+    "frameCount": 7
+  },
+  "capybara_jump": {
+    "frameWidth": 65,
+    "frameHeight": 74,
+    "frameCount": 3
+  },
+  "capybara_run_jump": {
+    "frameWidth": 80,
+    "frameHeight": 85,
+    "frameCount": 8
+  },
+  "capybara_wall_jump": {
+    "frameWidth": 75,
+    "frameHeight": 79,
+    "frameCount": 2
+  },
+  "watschler_walk": {
+    "frameWidth": 88,
+    "frameHeight": 55,
+    "frameCount": 7
+  },
+  "sprinter_walk": {
+    "frameWidth": 88,
+    "frameHeight": 53,
+    "frameCount": 7
+  },
+  "supersprinter_run": {
+    "frameWidth": 68,
+    "frameHeight": 80,
+    "frameCount": 4
+  },
+  "flutterer_fly": {
+    "frameWidth": 80,
+    "frameHeight": 45,
+    "frameCount": 3
+  },
+  "superflutterer_fly": {
+    "frameWidth": 77,
+    "frameHeight": 56,
+    "frameCount": 3
+  }
+}
