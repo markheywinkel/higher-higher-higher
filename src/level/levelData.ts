@@ -1,30 +1,8 @@
-import type { PlatformDef } from "../entities/platforms/Platform";
-import type { FluttererPath } from "../entities/enemies/Flutterer";
+import type { LevelData } from "./types";
 import { LEVEL_X_OFFSET, LEVEL_Y_OFFSET } from "../config/constants";
-
-export interface WallDef {
-  id: string;
-  x: number;
-  y: number;
-}
-
-export type GroundEnemyType = "waddler" | "sprinter" | "super-sprinter";
-export type FlyingEnemyType = "flutterer" | "super-flutterer";
-
-export interface GroundEnemyDef {
-  type: GroundEnemyType;
-  platformId: string;
-}
-
-export interface FlyingEnemyDef {
-  type: FlyingEnemyType;
-  path: FluttererPath;
-}
 
 const X = LEVEL_X_OFFSET;
 const Y = LEVEL_Y_OFFSET;
-
-export const PLAYER_START = { x: 110 + X, y: 600 + Y };
 
 /**
  * Sanfte Einführung, bevor der erste Gegner kommt:
@@ -33,56 +11,58 @@ export const PLAYER_START = { x: 110 + X, y: 600 + Y };
  *  p2 – Sprung mit Anlauf auf eine kleinere Plattform. Kein Gegner.
  *  p3 – nur per Wandsprung (Kamin w0/w1) erreichbar. Kein Gegner.
  *  p4 – erster Gegner (Watschler), Plattform bewusst wieder größer.
- * Ab dort erst nur Watschler, später kommt vereinzelt der Sprinter dazu
- * (siehe GROUND_ENEMIES). Supersprinter und Flug-Gegner sind aktuell nicht
- * platziert, herabfallende und vertikal bewegte Plattformen sind aktuell
- * durch solide ersetzt – das Spiel war insgesamt zu schwer. Mechaniken/
- * Code bleiben erhalten, nur im aktuellen Level nicht verwendet.
+ * Ab dort erst nur Watschler, später kommt vereinzelt der Sprinter dazu.
+ * Supersprinter und Flug-Gegner sind aktuell nicht platziert, herabfallende
+ * und vertikal bewegte Plattformen sind aktuell durch solide ersetzt – das
+ * Spiel war insgesamt zu schwer. Mechaniken/Code bleiben erhalten, nur im
+ * aktuellen Level nicht verwendet.
+ *
+ * Dies ist der Standard-Level. Im Level-Editor (editor.html) lässt sich das
+ * Level visuell bearbeiten und als JSON exportieren.
  */
-export const PLATFORMS: PlatformDef[] = [
-  { id: "p0", type: "solid", x: 110 + X, y: 670 + Y, material: "stone", widthOverride: 420 },
-  { id: "p1", type: "solid", x: 190 + X, y: 600 + Y, material: "wood", widthOverride: 300 },
-  { id: "p2", type: "solid", x: 440 + X, y: 530 + Y, material: "stone", widthOverride: 170 },
-  { id: "p3", type: "solid", x: 400 + X, y: 370 + Y, material: "wood", widthOverride: 140 },
-  { id: "p4", type: "solid", x: 200 + X, y: 290 + Y, material: "stone", widthOverride: 200 },
-  { id: "p5", type: "solid", x: 20 + X, y: 210 + Y, material: "wood" },
-  { id: "p6", type: "solid", x: 240 + X, y: 130 + Y, material: "stone" },
-  { id: "p7", type: "moving-h", x: -10 + X, y: 50 + Y, range: 140, speed: 70 },
-  { id: "p8", type: "solid", x: 250 + X, y: -30 + Y, material: "wood" },
-  { id: "p9", type: "solid", x: 80 + X, y: -110 + Y, material: "wood" },
-  { id: "p10", type: "solid", x: 280 + X, y: -180 + Y, material: "stone" },
-  { id: "p11", type: "solid", x: 70 + X, y: -360 + Y, material: "stone" },
-  { id: "p12", type: "moving-h", x: 280 + X, y: -440 + Y, range: 120, speed: 75 },
-  { id: "p13", type: "solid", x: 50 + X, y: -520 + Y, material: "wood" },
-  { id: "p14", type: "solid", x: 250 + X, y: -600 + Y, material: "stone" },
-  { id: "p15", type: "solid", x: 20 + X, y: -680 + Y, material: "wood" },
-  { id: "p16", type: "solid", x: 240 + X, y: -760 + Y, material: "stone" },
-  { id: "p17", type: "solid", x: 60 + X, y: -840 + Y, material: "wood" },
-  { id: "p18", type: "solid", x: 200 + X, y: -930 + Y, material: "stone" },
-];
+export const DEFAULT_LEVEL: LevelData = {
+  playerStart: { x: 110 + X, y: 600 + Y },
+  goal: { x: 200 + X, y: -930 + Y },
 
-export const GOAL_PLATFORM_ID = "p18";
+  platforms: [
+    { id: "p0", type: "solid", x: 110 + X, y: 670 + Y, material: "stone", widthOverride: 420 },
+    { id: "p1", type: "solid", x: 190 + X, y: 600 + Y, material: "wood", widthOverride: 300 },
+    { id: "p2", type: "solid", x: 440 + X, y: 530 + Y, material: "stone", widthOverride: 170 },
+    { id: "p3", type: "solid", x: 400 + X, y: 370 + Y, material: "wood", widthOverride: 140 },
+    { id: "p4", type: "solid", x: 200 + X, y: 290 + Y, material: "stone", widthOverride: 200 },
+    { id: "p5", type: "solid", x: 20 + X, y: 210 + Y, material: "wood" },
+    { id: "p6", type: "solid", x: 240 + X, y: 130 + Y, material: "stone" },
+    { id: "p7", type: "moving-h", x: -10 + X, y: 50 + Y, range: 140, speed: 70 },
+    { id: "p8", type: "solid", x: 250 + X, y: -30 + Y, material: "wood" },
+    { id: "p9", type: "solid", x: 80 + X, y: -110 + Y, material: "wood" },
+    { id: "p10", type: "solid", x: 280 + X, y: -180 + Y, material: "stone" },
+    { id: "p11", type: "solid", x: 70 + X, y: -360 + Y, material: "stone" },
+    { id: "p12", type: "moving-h", x: 280 + X, y: -440 + Y, range: 120, speed: 75 },
+    { id: "p13", type: "solid", x: 50 + X, y: -520 + Y, material: "wood" },
+    { id: "p14", type: "solid", x: 250 + X, y: -600 + Y, material: "stone" },
+    { id: "p15", type: "solid", x: 20 + X, y: -680 + Y, material: "wood" },
+    { id: "p16", type: "solid", x: 240 + X, y: -760 + Y, material: "stone" },
+    { id: "p17", type: "solid", x: 60 + X, y: -840 + Y, material: "wood" },
+    { id: "p18", type: "solid", x: 200 + X, y: -930 + Y, material: "stone" },
+  ],
 
-/** Zwei Wandsprung-Kamine: einer als Einführung (p2→p3), einer später (p10→p11). */
-export const WALLS: WallDef[] = [
-  { id: "w0", x: 360 + X, y: 450 + Y },
-  { id: "w1", x: 440 + X, y: 450 + Y },
-  { id: "w2", x: 150 + X, y: -270 + Y },
-  { id: "w3", x: 230 + X, y: -270 + Y },
-];
+  // Zwei Wandsprung-Kamine: einer als Einführung (p2→p3), einer später (p10→p11).
+  walls: [
+    { id: "w0", x: 360 + X, y: 450 + Y },
+    { id: "w1", x: 440 + X, y: 450 + Y },
+    { id: "w2", x: 150 + X, y: -270 + Y },
+    { id: "w3", x: 230 + X, y: -270 + Y },
+  ],
 
-// Supersprinter vorerst draußen (Sprung-Verfolgung ist der schwerste Gegnertyp) –
-// das Spiel war insgesamt zu schwer. Erst Watschler, Sprinter kommt erst spät dazu.
-export const GROUND_ENEMIES: GroundEnemyDef[] = [
-  { type: "waddler", platformId: "p4" },
-  { type: "waddler", platformId: "p6" },
-  { type: "waddler", platformId: "p8" },
-  { type: "waddler", platformId: "p11" },
-  { type: "sprinter", platformId: "p13" },
-  { type: "sprinter", platformId: "p16" },
-  { type: "waddler", platformId: "p17" },
-];
+  groundEnemies: [
+    { type: "waddler", x: 200 + X, y: 240 + Y },
+    { type: "waddler", x: 240 + X, y: 80 + Y },
+    { type: "waddler", x: 250 + X, y: -80 + Y },
+    { type: "waddler", x: 70 + X, y: -410 + Y },
+    { type: "sprinter", x: 50 + X, y: -570 + Y },
+    { type: "sprinter", x: 240 + X, y: -810 + Y },
+    { type: "waddler", x: 60 + X, y: -890 + Y },
+  ],
 
-// Flug-Gegner (Flatterer/Superflatterer) sind vorerst deaktiviert – das Spiel war
-// insgesamt zu schwer. Mechanik/Code bleibt vorhanden, hier nur keine Platzierungen.
-export const FLYING_ENEMIES: FlyingEnemyDef[] = [];
+  flyingEnemies: [],
+};

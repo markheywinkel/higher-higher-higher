@@ -17,13 +17,16 @@ export interface PlatformDef {
   speed?: number;
   /** Erzwingt eine abweichende Breite (Textur wird gestreckt) – z.B. für die lange Startplattform. */
   widthOverride?: number;
+  /** Größenvariante 1 (klein) – 4 (sehr groß). Default: globales PLATFORM_SIZE. */
+  size?: 1 | 2 | 3 | 4;
 }
 
 export function resolvePlatformTexture(def: PlatformDef): string {
+  const size = def.size ?? PLATFORM_SIZE;
   if (def.type === "solid") {
-    return `platform-solid-${def.material ?? "stone"}-${PLATFORM_SIZE}`;
+    return `platform-solid-${def.material ?? "stone"}-${size}`;
   }
-  return `platform-${def.type}-${PLATFORM_SIZE}`;
+  return `platform-${def.type}-${size}`;
 }
 
 /** Basisklasse für alle Plattformen. */

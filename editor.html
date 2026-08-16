@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Level-Editor – Higher, higher, higher</title>
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: #14141f;
+        color: #eee;
+        font-family: system-ui, sans-serif;
+        height: 100%;
+        overflow: hidden;
+      }
+      #layout {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+      }
+      #toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 14px;
+        padding: 8px 12px;
+        background: #1e1e2e;
+        border-bottom: 2px solid #333;
+      }
+      .group {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-right: 1px solid #3a3a4a;
+      }
+      .group:last-child {
+        border-right: none;
+      }
+      .group-label {
+        font-size: 11px;
+        color: #999;
+        margin-right: 6px;
+        white-space: nowrap;
+      }
+      button.tool {
+        background: #2a2a3a;
+        border: 2px solid transparent;
+        border-radius: 6px;
+        padding: 3px;
+        cursor: pointer;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      button.tool img {
+        max-width: 32px;
+        max-height: 32px;
+        image-rendering: pixelated;
+      }
+      button.tool.active {
+        border-color: #ffcc33;
+        background: #3a3320;
+      }
+      button.tool:hover {
+        border-color: #666;
+      }
+      button.action {
+        background: #333;
+        color: #eee;
+        border: none;
+        border-radius: 6px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font-size: 13px;
+      }
+      button.action:hover {
+        background: #444;
+      }
+      button.action.primary {
+        background: #2f7d3a;
+      }
+      button.action.primary:hover {
+        background: #388a44;
+      }
+      .size-stepper {
+        display: flex;
+        gap: 2px;
+      }
+      .size-stepper button {
+        width: 26px;
+        height: 26px;
+        border: 1px solid #444;
+        background: #2a2a3a;
+        color: #ccc;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 12px;
+      }
+      .size-stepper button.active {
+        background: #ffcc33;
+        color: #222;
+        border-color: #ffcc33;
+      }
+      .mat-toggle {
+        display: flex;
+        gap: 2px;
+      }
+      .mat-toggle button {
+        border: 1px solid #444;
+        background: #2a2a3a;
+        color: #ccc;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 11px;
+        padding: 4px 6px;
+      }
+      .mat-toggle button.active {
+        background: #ffcc33;
+        color: #222;
+        border-color: #ffcc33;
+      }
+      #canvas-wrap {
+        flex: 1;
+        min-height: 0;
+        position: relative;
+      }
+      #editor-canvas {
+        width: 100%;
+        height: 100%;
+      }
+      #editor-canvas canvas {
+        display: block;
+      }
+      #hint {
+        position: absolute;
+        bottom: 8px;
+        left: 8px;
+        background: #000000aa;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        color: #ccc;
+        max-width: 480px;
+        line-height: 1.5;
+        pointer-events: none;
+      }
+      #fileInput {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="layout">
+      <div id="toolbar">
+        <div class="group">
+          <span class="group-label">Plattformen</span>
+          <button class="tool" data-tool="platform-solid-stone" title="Solide (Stein)">
+            <img src="/sprites/platform_solid_stone_3.png" alt="" />
+          </button>
+          <button class="tool" data-tool="platform-solid-wood" title="Solide (Holz)">
+            <img src="/sprites/platform_solid_wood_3.png" alt="" />
+          </button>
+          <button class="tool" data-tool="platform-falling" title="Herabfallend">
+            <img src="/sprites/platform_falling_3.png" alt="" />
+          </button>
+          <button class="tool" data-tool="platform-moving-h" title="Horizontal beweglich">
+            <img src="/sprites/platform_moving_h_3.png" alt="" />
+          </button>
+          <button class="tool" data-tool="platform-moving-v" title="Vertikal beweglich">
+            <img src="/sprites/platform_moving_v_3.png" alt="" />
+          </button>
+          <div class="size-stepper" id="sizeStepper">
+            <button data-size="1">1</button>
+            <button data-size="2">2</button>
+            <button data-size="3" class="active">3</button>
+            <button data-size="4">4</button>
+          </div>
+        </div>
+
+        <div class="group">
+          <span class="group-label">Gegner</span>
+          <button class="tool" data-tool="enemy-waddler" title="Watschler">
+            <img src="/sprites/watschler_dead.png" alt="" />
+          </button>
+          <button class="tool" data-tool="enemy-sprinter" title="Sprinter">
+            <img src="/sprites/sprinter_dead.png" alt="" />
+          </button>
+          <button class="tool" data-tool="enemy-super-sprinter" title="Supersprinter">
+            <img src="/sprites/supersprinter_dead.png" alt="" />
+          </button>
+          <button class="tool" data-tool="enemy-flutterer" title="Flatterer (klicken + ziehen für Flugstrecke)">
+            <img src="/sprites/flutterer_dead.png" alt="" />
+          </button>
+          <button class="tool" data-tool="enemy-super-flutterer" title="Superflatterer (klicken + ziehen)">
+            <img src="/sprites/superflutterer_dead.png" alt="" />
+          </button>
+        </div>
+
+        <div class="group">
+          <span class="group-label">Sonstiges</span>
+          <button class="tool" data-tool="wall" title="Wand (für Wandsprung)">
+            <img src="/sprites/wall.png" alt="" />
+          </button>
+          <button class="tool" data-tool="player-start" title="Startpunkt Spieler">
+            <img src="/sprites/capybara_icon.png" alt="" />
+          </button>
+          <button class="tool" data-tool="goal" title="Ziel">
+            <img src="/sprites/ui_higher_sign.png" alt="" />
+          </button>
+          <button class="tool" data-tool="erase" title="Löschen">🗑</button>
+        </div>
+
+        <div class="group">
+          <button class="action" id="btnNew">Neu</button>
+          <button class="action" id="btnLoadDefault">Standard laden</button>
+          <button class="action" id="btnImport">Importieren</button>
+          <button class="action" id="btnExport">Exportieren</button>
+          <button class="action primary" id="btnTest">▶ Testen</button>
+        </div>
+        <input type="file" id="fileInput" accept="application/json" />
+      </div>
+
+      <div id="canvas-wrap">
+        <div id="editor-canvas"></div>
+        <div id="hint">
+          Klick: platzieren · Radierer: anklicken zum Entfernen · Pfeiltasten/Mausrad: scrollen ·
+          Flatterer/Superflatterer: klicken + ziehen für die Flugstrecke
+        </div>
+      </div>
+    </div>
+    <script type="module" src="/src/editor.ts"></script>
+  </body>
+</html>

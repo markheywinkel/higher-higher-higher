@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { loadSprites, loadGameOverScreen, loadWinScreen, loadBackground, createAnimations } from "../assets";
+import { loadSprites, loadGameOverScreen, loadWinScreen, loadBackground, loadAudio, createAnimations } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
 import { ensureMusicPlaying, playSfx } from "../audio";
 import { Player, type PlayerInput } from "../entities/Player";
@@ -14,17 +14,12 @@ import { Flutterer } from "../entities/enemies/Flutterer";
 import { SuperFlutterer } from "../entities/enemies/SuperFlutterer";
 import type { ChasingGroundEnemy } from "../entities/enemies/ChasingGroundEnemy";
 import type { Enemy } from "../entities/enemies/Enemy";
-import {
-  PLATFORMS,
-  WALLS,
-  GROUND_ENEMIES,
-  FLYING_ENEMIES,
-  PLAYER_START,
-  GOAL_PLATFORM_ID,
-} from "../level/levelData";
+import { resolveNearestPlatformBelow } from "../level/resolvePlatform";
+import { DEFAULT_LEVEL } from "../level/levelData";
+import type { LevelData } from "../level/types";
 import { GAME_HEIGHT, GAME_WIDTH, GRAVITY_Y, LAVA_Y, DEPTH } from "../config/constants";
 
-const WORLD_TOP = -760;
+const WORLD_MARGIN_TOP = 300;
 const WORLD_BOTTOM = GAME_HEIGHT + 200;
 const GAMEOVER_BUTTON = { xFrac: 0.508, yFrac: 0.71, widthFrac: 0.353, heightFrac: 0.165 };
 const WIN_BUTTON = { xFrac: 0.495, yFrac: 0.9166, widthFrac: 0.326, heightFrac: 0.1435 };
@@ -32,7 +27,19 @@ const CAMERA_ZOOM = 2.25;
 
 type RunState = "playing" | "gameover" | "win";
 
+export interface GameSceneData {
+  /** Zum Testen eines im Editor entworfenen Levels statt des Standard-Levels. */
+  level?: LevelData;
+  /** Escape kehrt zum Editor zurück statt nichts zu tun (nur im Testmodus relevant). */
+  fromEditor?: boolean;
+}
+
 export class GameScene extends Phaser.Scene {
+  private level!: LevelData;
+  private fromEditor = false;
+  private worldTop = 0;
+  private keyEsc?: Phaser.Input.Keyboard.Key;
+
   private player!: Player;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
   private keyA!: Phaser.Input.Keyboard.Key;
@@ -55,11 +62,19 @@ export class GameScene extends Phaser.Scene {
     super("GameScene");
   }
 
+  init(data: GameSceneData): void {
+    this.level = data.level ?? DEFAULT_LEVEL;
+    this.fromEditor = data.fromEditor ?? false;
+  }
+
   preload(): void {
     loadSprites(this);
     loadGameOverScreen(this);
     loadWinScreen(this);
     loadBackground(this);
+    // Im Hauptspiel bereits von StartScene geladen (Loader überspringt bereits
+    // gecachte Keys); im Editor-Testmodus ist GameScene aber der Erstzugriff.
+    loadAudio(this);
   }
 
   create(): void {
@@ -67,8 +82,17 @@ export class GameScene extends Phaser.Scene {
     ensureMusicPlaying(this);
     this.runState = "playing";
     this.playerCurrentPlatformId = null;
+    this.platformsById.clear();
+    this.chasingEnemies = [];
 
-    this.physics.world.setBounds(0, WORLD_TOP, GAME_WIDTH, WORLD_BOTTOM - WORLD_TOP);
+    const allY = [
+      ...this.level.platforms.map((p) => p.y),
+      this.level.goal.y,
+      this.level.playerStart.y,
+    ];
+    this.worldTop = Math.min(...allY) - WORLD_MARGIN_TOP;
+
+    this.physics.world.setBounds(0, this.worldTop, GAME_WIDTH, WORLD_BOTTOM - this.worldTop);
     this.physics.world.gravity.y = GRAVITY_Y;
 
     this.buildBackground();
@@ -77,7 +101,7 @@ export class GameScene extends Phaser.Scene {
     this.buildWalls();
     this.buildGoalMarker();
 
-    this.player = new Player(this, PLAYER_START.x, PLAYER_START.y);
+    this.player = new Player(this, this.level.playerStart.x, this.level.playerStart.y);
     this.player.setDepth(DEPTH.PLAYER);
 
     this.buildEnemies();
@@ -91,7 +115,7 @@ export class GameScene extends Phaser.Scene {
     // Kletterspur nicht in einer leeren dunklen Fläche schwebt.
     const bg = this.add.image(GAME_WIDTH / 2, LAVA_Y, "background-sky");
     bg.setOrigin(0.5, 1);
-    bg.setDisplaySize(GAME_WIDTH + 40, LAVA_Y - WORLD_TOP);
+    bg.setDisplaySize(GAME_WIDTH + 40, LAVA_Y - this.worldTop);
     bg.setDepth(DEPTH.BACKGROUND);
   }
 
@@ -128,7 +152,7 @@ export class GameScene extends Phaser.Scene {
     // bereits konfigurierte Bodies zurücksetzt.
     this.movingPlatforms = this.physics.add.group({ allowGravity: false, immovable: true });
 
-    for (const def of PLATFORMS) {
+    for (const def of this.level.platforms) {
       let platform: Platform;
       if (def.type === "solid") {
         platform = new SolidPlatform(this, def);
@@ -149,7 +173,7 @@ export class GameScene extends Phaser.Scene {
 
   private buildWalls(): void {
     this.walls = this.physics.add.staticGroup();
-    for (const def of WALLS) {
+    for (const def of this.level.walls) {
       const wall = this.add.sprite(def.x, def.y, "wall");
       this.physics.add.existing(wall, true);
       wall.setDepth(DEPTH.PLATFORM);
@@ -158,8 +182,7 @@ export class GameScene extends Phaser.Scene {
   }
 
   private buildGoalMarker(): void {
-    const goal = this.platformsById.get(GOAL_PLATFORM_ID);
-    if (!goal) return;
+    const goal = this.level.goal;
     const flag = this.add.image(goal.x, goal.y - 45, "ui-higher-sign");
     flag.setDepth(DEPTH.PLATFORM);
   }
@@ -168,8 +191,10 @@ export class GameScene extends Phaser.Scene {
     this.groundEnemies = this.physics.add.group();
     this.flyingEnemies = this.physics.add.group();
 
-    for (const def of GROUND_ENEMIES) {
-      const platform = this.platformsById.get(def.platformId);
+    const allPlatforms = [...this.platformsById.values()];
+
+    for (const def of this.level.groundEnemies) {
+      const platform = resolveNearestPlatformBelow(def.x, def.y, allPlatforms);
       if (!platform) continue;
 
       let enemy: Enemy;
@@ -188,7 +213,7 @@ export class GameScene extends Phaser.Scene {
       this.groundEnemies.add(enemy);
     }
 
-    for (const def of FLYING_ENEMIES) {
+    for (const def of this.level.flyingEnemies) {
       const enemy =
         def.type === "flutterer"
           ? new Flutterer(this, def.path)
@@ -273,7 +298,7 @@ export class GameScene extends Phaser.Scene {
 
   private setupCamera(): void {
     const cam = this.cameras.main;
-    cam.setBounds(0, WORLD_TOP, GAME_WIDTH, WORLD_BOTTOM - WORLD_TOP);
+    cam.setBounds(0, this.worldTop, GAME_WIDTH, WORLD_BOTTOM - this.worldTop);
     cam.setZoom(CAMERA_ZOOM);
     cam.startFollow(this.player, true, 0.1, 0.12);
     cam.setDeadzone(40, 90);
@@ -285,9 +310,16 @@ export class GameScene extends Phaser.Scene {
     this.keyD = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyShift = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     this.keySpace = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    if (this.fromEditor) {
+      this.keyEsc = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
+    }
   }
 
   update(time: number, delta: number): void {
+    if (this.fromEditor && this.keyEsc && Phaser.Input.Keyboard.JustDown(this.keyEsc)) {
+      this.scene.start("EditorScene", { level: this.level });
+      return;
+    }
     if (this.runState === "playing") {
       this.updatePlaying(time);
     }
@@ -314,8 +346,7 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    const goalPlatform = this.platformsById.get(GOAL_PLATFORM_ID);
-    if (goalPlatform && this.player.y < goalPlatform.y - 10) {
+    if (this.player.y < this.level.goal.y - 10) {
       this.triggerWin();
     }
   }
@@ -341,12 +372,18 @@ export class GameScene extends Phaser.Scene {
   private triggerGameOver(): void {
     this.runState = "gameover";
     this.physics.pause();
-    showButtonScreen(this, "screen-gameover", GAMEOVER_BUTTON, () => this.scene.restart());
+    // level explizit weiterreichen, sonst geht ein im Editor getestetes Level beim
+    // Neustart verloren und es würde wieder das Standard-Level laden.
+    showButtonScreen(this, "screen-gameover", GAMEOVER_BUTTON, () =>
+      this.scene.restart({ level: this.level }),
+    );
   }
 
   private triggerWin(): void {
     this.runState = "win";
     this.physics.pause();
-    showButtonScreen(this, "screen-win", WIN_BUTTON, () => this.scene.restart());
+    showButtonScreen(this, "screen-win", WIN_BUTTON, () =>
+      this.scene.restart({ level: this.level }),
+    );
   }
 }
