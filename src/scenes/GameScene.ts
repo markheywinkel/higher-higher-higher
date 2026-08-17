@@ -24,6 +24,9 @@ const WORLD_BOTTOM = GAME_HEIGHT + 200;
 const GAMEOVER_BUTTON = { xFrac: 0.508, yFrac: 0.71, widthFrac: 0.353, heightFrac: 0.165 };
 const WIN_BUTTON = { xFrac: 0.495, yFrac: 0.9166, widthFrac: 0.326, heightFrac: 0.1435 };
 const CAMERA_ZOOM = 2.25;
+/** Toleranz, wie nah der Spieler am Higher-Symbol sein muss, um das Level zu gewinnen. */
+const GOAL_REACH_X = 90;
+const GOAL_REACH_Y = 20;
 
 type RunState = "playing" | "gameover" | "win";
 
@@ -228,6 +231,8 @@ export class GameScene extends Phaser.Scene {
       this.player,
       this.staticPlatforms,
       (playerObj, platformObj) => this.onPlayerLandsOnPlatform(playerObj as Player, platformObj as Platform),
+      (playerObj, platformObj) =>
+        this.canPlayerCollideWithPlatform(playerObj as Player, platformObj as Platform),
     );
     this.physics.add.collider(
       this.player,
@@ -251,6 +256,18 @@ export class GameScene extends Phaser.Scene {
       this.flyingEnemies,
       (playerObj, enemyObj) => this.onPlayerEnemyContact(playerObj as Player, enemyObj as Enemy),
     );
+  }
+
+  /**
+   * Holzplattformen sind von unten durchspringbar: Kollision nur, wenn der
+   * Spieler sich (fallend oder stehend) von oben nähert. Springt er von unten
+   * dagegen, wird die Kollision unterdrückt und er fliegt hindurch.
+   */
+  private canPlayerCollideWithPlatform(player: Player, platform: Platform): boolean {
+    if (!(platform instanceof SolidPlatform) || platform.def.material !== "wood") return true;
+    const body = player.body as Phaser.Physics.Arcade.Body;
+    const platformBody = platform.body as Phaser.Physics.Arcade.StaticBody;
+    return body.velocity.y >= 0 && body.bottom <= platformBody.top + 10;
   }
 
   private onPlayerLandsOnPlatform(player: Player, platform: Platform): void {
@@ -346,9 +363,17 @@ export class GameScene extends Phaser.Scene {
       return;
     }
 
-    if (this.player.y < this.level.goal.y - 10) {
+    if (this.isPlayerAtGoal()) {
       this.triggerWin();
     }
+  }
+
+  /** Sieg erst, wenn der Spieler tatsächlich beim Higher-Symbol ankommt, nicht bei jeder x-Position auf dieser Höhe. */
+  private isPlayerAtGoal(): boolean {
+    const goal = this.level.goal;
+    return (
+      Math.abs(this.player.x - goal.x) < GOAL_REACH_X && this.player.y < goal.y + GOAL_REACH_Y
+    );
   }
 
   private updateChasers(): void {

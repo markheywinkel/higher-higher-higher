@@ -25,10 +25,10 @@ const ANIM_SHEETS: AnimSheetConfig[] = [
   { key: "capybara-jump", file: "capybara_jump.png", frameWidth: 80, frameHeight: 85, frameRate: 10, repeat: 0 },
   { key: "capybara-run-jump", file: "capybara_run_jump.png", frameWidth: 80, frameHeight: 85, frameRate: 14, repeat: 0 },
   { key: "capybara-wall-jump", file: "capybara_wall_jump.png", frameWidth: 80, frameHeight: 85, frameRate: 10, repeat: 0 },
-  { key: "watschler-walk", file: "watschler_walk.png", frameWidth: 88, frameHeight: 55, frameRate: 6, repeat: -1 },
-  { key: "sprinter-walk", file: "sprinter_walk.png", frameWidth: 88, frameHeight: 53, frameRate: 10, repeat: -1 },
+  { key: "watschler-walk", file: "watschler_walk.png", frameWidth: 90, frameHeight: 59, frameRate: 6, repeat: -1 },
+  { key: "sprinter-walk", file: "sprinter_walk.png", frameWidth: 92, frameHeight: 55, frameRate: 10, repeat: -1 },
   { key: "supersprinter-run", file: "supersprinter_run.png", frameWidth: 68, frameHeight: 80, frameRate: 12, repeat: -1 },
-  { key: "flutterer-fly", file: "flutterer_fly.png", frameWidth: 80, frameHeight: 45, frameRate: 8, repeat: -1 },
+  { key: "flutterer-fly", file: "flutterer_fly.png", frameWidth: 85, frameHeight: 48, frameRate: 8, repeat: -1 },
   { key: "superflutterer-fly", file: "superflutterer_fly.png", frameWidth: 77, frameHeight: 56, frameRate: 8, repeat: -1 },
 ];
 
