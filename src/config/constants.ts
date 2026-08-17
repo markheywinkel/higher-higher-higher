@@ -38,7 +38,12 @@ export const ENEMY_SPEED = {
 } as const;
 
 export const ENEMY_AGGRO_RADIUS = 160;
-export const ENEMY_STOMP_BOUNCE = -320;
+// Bounce durch Gegner-Stomp um 100% erhöht (Basiswert war -320).
+export const ENEMY_STOMP_BOUNCE = -640;
+/** Kurze Sperre, damit der Stomp-Bounce nicht sofort von der "kurzer Sprung,
+ *  wenn Sprungtaste losgelassen"-Mechanik abgewürgt wird (die ist eigentlich
+ *  nur für den eigenen Sprung des Spielers gedacht). */
+export const ENEMY_STOMP_BOUNCE_LOCK_MS = 250;
 
 export const FALLING_PLATFORM_DELAY_MS = 500;
 export const FALLING_PLATFORM_SHAKE_MS = 350;

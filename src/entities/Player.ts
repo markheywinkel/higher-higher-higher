@@ -1,5 +1,5 @@
 import Phaser from "phaser";
-import { PLAYER } from "../config/constants";
+import { PLAYER, ENEMY_STOMP_BOUNCE, ENEMY_STOMP_BOUNCE_LOCK_MS } from "../config/constants";
 import { playSfx } from "../audio";
 
 export interface PlayerInput {
@@ -18,6 +18,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
   private lastWallTouchAt = -Infinity;
   private wallJumpLockedUntil = 0;
   private knockbackLockedUntil = 0;
+  private stompBounceLockedUntil = 0;
   private airborneAnim: "capybara-jump" | "capybara-run-jump" = "capybara-jump";
 
   constructor(scene: Phaser.Scene, x: number, y: number) {
@@ -50,6 +51,17 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
     body.setVelocityX(dir * PLAYER.KNOCKBACK_X);
     body.setVelocityY(PLAYER.KNOCKBACK_Y);
     this.knockbackLockedUntil = time + PLAYER.KNOCKBACK_LOCK_MS;
+  }
+
+  /**
+   * Sprung-Bounce nach dem Stomp eines Gegners. Braucht eine eigene kurze Sperre,
+   * sonst würde die "kurzer Sprung, wenn Sprungtaste losgelassen"-Dämpfung weiter
+   * unten den Bounce sofort abwürgen, obwohl der Spieler gar keinen Sprung ausgelöst hat.
+   */
+  applyStompBounce(time: number): void {
+    const body = this.body as Phaser.Physics.Arcade.Body;
+    body.setVelocityY(ENEMY_STOMP_BOUNCE);
+    this.stompBounceLockedUntil = time + ENEMY_STOMP_BOUNCE_LOCK_MS;
   }
 
   update(input: PlayerInput, time: number): void {
@@ -116,7 +128,7 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
       playSfx(this.scene, "sfx-jump");
     }
 
-    if (!input.jumpHeld && body.velocity.y < 0) {
+    if (!input.jumpHeld && body.velocity.y < 0 && time >= this.stompBounceLockedUntil) {
       body.setVelocityY(body.velocity.y * 0.55);
     }
 

@@ -316,7 +316,7 @@ export class GameScene extends Phaser.Scene {
 
     if (stompedFromAbove) {
       enemy.stomp();
-      body.setVelocityY(-320);
+      player.applyStompBounce(this.time.now);
       this.spawnEffect(enemy.x, enemy.y, "effect-hit-stars");
       playSfx(this, "sfx-stomp");
     } else {
