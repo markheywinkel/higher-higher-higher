@@ -33,6 +33,9 @@ const WORLD_BOTTOM = GAME_HEIGHT + 200;
 const GAMEOVER_BUTTON = { xFrac: 0.508, yFrac: 0.71, widthFrac: 0.353, heightFrac: 0.165 };
 const WIN_BUTTON = { xFrac: 0.495, yFrac: 0.9166, widthFrac: 0.326, heightFrac: 0.1435 };
 const CAMERA_ZOOM = 2.25;
+/** Scroll-Geschwindigkeit der Lava-Textur in px/s, für ein fließendes Bewegungsgefühl. */
+const LAVA_SCROLL_SPEED_X = 18;
+const LAVA_SCROLL_SPEED_Y = 10;
 /** Toleranz, wie nah der Spieler am Higher-Symbol sein muss, um das Level zu gewinnen. */
 const GOAL_REACH_X = 90;
 const GOAL_REACH_Y = 20;
@@ -53,6 +56,7 @@ export class GameScene extends Phaser.Scene {
   private keyEsc?: Phaser.Input.Keyboard.Key;
   private keyEnter!: Phaser.Input.Keyboard.Key;
   private pauseOverlay?: Phaser.GameObjects.Container;
+  private lava!: Phaser.GameObjects.TileSprite;
 
   private player!: Player;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -131,7 +135,16 @@ export class GameScene extends Phaser.Scene {
     // Kletterspur nicht in einer leeren dunklen Fläche schwebt.
     const bg = this.add.image(GAME_WIDTH / 2, LAVA_Y, "background-sky");
     bg.setOrigin(0.5, 1);
-    bg.setDisplaySize(GAME_WIDTH + 40, LAVA_Y - this.worldTop);
+
+    // Gleichmäßig skalieren (nicht setDisplaySize mit fixer Breite/Höhe!) --
+    // sonst wird das Bild nicht-proportional gestreckt und verzerrt, sobald das
+    // Level-Seitenverhältnis vom Bild abweicht (bei variabler Levelhöhe der
+    // Normalfall). "Cover"-Skalierung: der größere der beiden nötigen Faktoren
+    // gewinnt, der Rest ragt unsichtbar über die Kamera-/Weltgrenzen hinaus.
+    const neededWidth = GAME_WIDTH + 40;
+    const neededHeight = LAVA_Y - this.worldTop;
+    const scale = Math.max(neededWidth / bg.width, neededHeight / bg.height);
+    bg.setScale(scale);
     bg.setDepth(DEPTH.BACKGROUND);
   }
 
@@ -160,6 +173,7 @@ export class GameScene extends Phaser.Scene {
     );
     lava.setOrigin(0.5, 0);
     lava.setDepth(DEPTH.LAVA + 1);
+    this.lava = lava;
   }
 
   private buildPlatforms(): void {
@@ -427,6 +441,7 @@ export class GameScene extends Phaser.Scene {
     };
 
     this.player.update(input, time);
+    this.updateLava();
     this.updateChasers();
     this.cleanupFallenEnemies();
 
@@ -446,6 +461,12 @@ export class GameScene extends Phaser.Scene {
     return (
       Math.abs(this.player.x - goal.x) < GOAL_REACH_X && this.player.y < goal.y + GOAL_REACH_Y
     );
+  }
+
+  private updateLava(): void {
+    const deltaSeconds = this.game.loop.delta / 1000;
+    this.lava.tilePositionX += LAVA_SCROLL_SPEED_X * deltaSeconds;
+    this.lava.tilePositionY += LAVA_SCROLL_SPEED_Y * deltaSeconds;
   }
 
   private updateChasers(): void {
