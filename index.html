@@ -5,20 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Higher, higher, higher</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
       html,
       body {
         margin: 0;
         padding: 0;
         background: #0a0a12;
-        height: 100%;
-        overflow: hidden;
+        color: #eee;
+        font-family: system-ui, sans-serif;
+        min-height: 100%;
+      }
+      body {
         display: flex;
+        flex-direction: column;
         align-items: center;
-        justify-content: center;
+        padding: 32px 16px 48px;
+      }
+      header {
+        width: min(900px, 92vw);
+        text-align: center;
+        margin-bottom: 20px;
+      }
+      h1 {
+        margin: 0 0 6px;
+        font-size: clamp(24px, 4vw, 34px);
+      }
+      header p {
+        margin: 0;
+        color: #bbb;
+        font-size: 15px;
+      }
+      header a {
+        color: #ffcc33;
+        text-decoration: none;
+      }
+      header a:hover {
+        text-decoration: underline;
       }
       #app {
         line-height: 0;
-        width: min(80vw, 142.22vh);
+        width: min(900px, 92vw);
         aspect-ratio: 16 / 9;
       }
       canvas {
@@ -29,7 +57,6 @@
         bottom: 12px;
         right: 12px;
         z-index: 10;
-        font-family: system-ui, sans-serif;
         font-size: 13px;
         color: #ccc;
         background: #1e1e2eaa;
@@ -42,10 +69,41 @@
         background: #2a2a3a;
         color: #fff;
       }
+      .note {
+        width: min(900px, 92vw);
+        margin-top: 24px;
+        padding: 16px 20px;
+        background: #14141f;
+        border: 1px solid #2a2a3a;
+        border-radius: 10px;
+      }
+      .note h2 {
+        margin: 0 0 8px;
+        font-size: 15px;
+        color: #ffcc33;
+      }
+      .note p {
+        margin: 0;
+        font-size: 14px;
+        line-height: 1.6;
+        color: #ccc;
+      }
     </style>
   </head>
   <body>
+    <header>
+      <h1>Higher, higher, higher</h1>
+      <p>Ein Jump'n'Run-Testspiel von <a href="https://www.markheywinkel.de" target="_blank" rel="noopener">Mark Heywinkel</a></p>
+    </header>
     <div id="app"></div>
+    <div class="note">
+      <h2>Notiz</h2>
+      <p>
+        Das Jump'n'Run »Higher, higher, higher« ist vollständig KI-generiert. Es sind Claude für
+        den Code sowie GPT für Sprites und Musik im Einsatz gewesen. Der Code liegt auf GitHub,
+        Host ist Vercel.
+      </p>
+    </div>
     <a id="editor-link" href="/editor.html">🛠 Level-Editor</a>
     <script type="module" src="/src/main.ts"></script>
   </body>
