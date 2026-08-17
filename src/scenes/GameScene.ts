@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { loadSprites, loadGameOverScreen, loadWinScreen, loadBackground, loadAudio, createAnimations } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
+import { createMuteButton } from "../ui/muteButton";
 import { ensureMusicPlaying, playSfx } from "../audio";
 import { Player, type PlayerInput } from "../entities/Player";
 import { SolidPlatform } from "../entities/platforms/SolidPlatform";
@@ -28,7 +29,7 @@ const CAMERA_ZOOM = 2.25;
 const GOAL_REACH_X = 90;
 const GOAL_REACH_Y = 20;
 
-type RunState = "playing" | "gameover" | "win";
+type RunState = "playing" | "paused" | "gameover" | "win";
 
 export interface GameSceneData {
   /** Zum Testen eines im Editor entworfenen Levels statt des Standard-Levels. */
@@ -42,6 +43,8 @@ export class GameScene extends Phaser.Scene {
   private fromEditor = false;
   private worldTop = 0;
   private keyEsc?: Phaser.Input.Keyboard.Key;
+  private keyEnter!: Phaser.Input.Keyboard.Key;
+  private pauseOverlay?: Phaser.GameObjects.Container;
 
   private player!: Player;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -111,6 +114,7 @@ export class GameScene extends Phaser.Scene {
     this.setupColliders();
     this.setupCamera();
     this.setupInput();
+    createMuteButton(this);
   }
 
   private buildBackground(): void {
@@ -239,6 +243,8 @@ export class GameScene extends Phaser.Scene {
       this.movingPlatforms,
       (playerObj, platformObj) =>
         this.onPlayerLandsOnMovingPlatform(playerObj as Player, platformObj as MovingPlatform),
+      (playerObj, platformObj) =>
+        this.isApproachingFromAbove(playerObj as Player, (platformObj as Platform).body as Phaser.Physics.Arcade.Body),
     );
     this.physics.add.collider(this.player, this.walls);
 
@@ -265,8 +271,15 @@ export class GameScene extends Phaser.Scene {
    */
   private canPlayerCollideWithPlatform(player: Player, platform: Platform): boolean {
     if (!(platform instanceof SolidPlatform) || platform.def.material !== "wood") return true;
+    return this.isApproachingFromAbove(player, platform.body as Phaser.Physics.Arcade.StaticBody);
+  }
+
+  /** Bewegliche Plattformen sind ebenfalls von unten durchspringbar (gleiches Prinzip). */
+  private isApproachingFromAbove(
+    player: Player,
+    platformBody: Phaser.Physics.Arcade.Body | Phaser.Physics.Arcade.StaticBody,
+  ): boolean {
     const body = player.body as Phaser.Physics.Arcade.Body;
-    const platformBody = platform.body as Phaser.Physics.Arcade.StaticBody;
     return body.velocity.y >= 0 && body.bottom <= platformBody.top + 10;
   }
 
@@ -327,6 +340,7 @@ export class GameScene extends Phaser.Scene {
     this.keyD = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.D);
     this.keyShift = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
     this.keySpace = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    this.keyEnter = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ENTER);
     if (this.fromEditor) {
       this.keyEsc = this.input.keyboard!.addKey(Phaser.Input.Keyboard.KeyCodes.ESC);
     }
@@ -337,10 +351,74 @@ export class GameScene extends Phaser.Scene {
       this.scene.start("EditorScene", { level: this.level });
       return;
     }
+    if (
+      (this.runState === "playing" || this.runState === "paused") &&
+      Phaser.Input.Keyboard.JustDown(this.keyEnter)
+    ) {
+      this.togglePause();
+      return;
+    }
     if (this.runState === "playing") {
       this.updatePlaying(time);
     }
     void delta;
+  }
+
+  private togglePause(): void {
+    if (this.runState === "playing") {
+      this.runState = "paused";
+      this.physics.pause();
+      this.tweens.pauseAll();
+      this.time.paused = true;
+      this.anims.pauseAll();
+      this.showPauseOverlay();
+    } else {
+      this.runState = "playing";
+      this.physics.resume();
+      this.tweens.resumeAll();
+      this.time.paused = false;
+      this.anims.resumeAll();
+      this.hidePauseOverlay();
+    }
+  }
+
+  private showPauseOverlay(): void {
+    const cam = this.cameras.main;
+    cam.setZoom(1);
+
+    const bg = this.add
+      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+      .setScrollFactor(0)
+      .setDepth(DEPTH.UI + 2);
+    const title = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, "PAUSE", {
+        fontFamily: "system-ui, sans-serif",
+        fontSize: "120px",
+        fontStyle: "bold",
+        color: "#ffffff",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(DEPTH.UI + 3);
+    const subtitle = this.add
+      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80, "Enter drücken zum Fortsetzen", {
+        fontFamily: "system-ui, sans-serif",
+        fontSize: "36px",
+        color: "#cccccc",
+      })
+      .setOrigin(0.5)
+      .setScrollFactor(0)
+      .setDepth(DEPTH.UI + 3);
+
+    this.pauseOverlay = this.add.container(0, 0, [bg, title, subtitle]);
+  }
+
+  private hidePauseOverlay(): void {
+    this.pauseOverlay?.destroy(true);
+    this.pauseOverlay = undefined;
+    const cam = this.cameras.main;
+    cam.setZoom(CAMERA_ZOOM);
+    cam.startFollow(this.player, true, 0.1, 0.12);
   }
 
   private updatePlaying(time: number): void {

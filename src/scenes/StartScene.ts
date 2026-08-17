@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { loadStartScreen, loadAudio } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
+import { createMuteButton } from "../ui/muteButton";
 import { ensureMusicPlaying } from "../audio";
 
 const START_BUTTON = { xFrac: 0.4995, yFrac: 0.6722, widthFrac: 0.29, heightFrac: 0.145 };
@@ -23,5 +24,6 @@ export class StartScene extends Phaser.Scene {
     showButtonScreen(this, "screen-start", START_BUTTON, () => {
       this.scene.start("GameScene");
     });
+    createMuteButton(this);
   }
 }

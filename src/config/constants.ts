@@ -41,6 +41,11 @@ export const ENEMY_STOMP_BOUNCE = -320;
 
 export const FALLING_PLATFORM_DELAY_MS = 500;
 export const FALLING_PLATFORM_SHAKE_MS = 350;
+/** Wartezeit, nachdem die Plattform verschwunden ist, bevor sie zurückblinkt. */
+export const FALLING_PLATFORM_RESPAWN_MS = 5000;
+export const FALLING_PLATFORM_BLINK_MS = 150;
+/** Tween-`repeat`-Wert für das Blinken (yoyo) – ergibt ca. 4 sichtbare Blink-Zyklen. */
+export const FALLING_PLATFORM_BLINK_REPEATS = 7;
 
 export const LAVA_Y = GAME_HEIGHT - 24;
 
