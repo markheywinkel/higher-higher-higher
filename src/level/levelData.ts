@@ -43,21 +43,23 @@ export const DEFAULT_LEVEL: LevelData = {
     { id: "p50", x: 600, y: -560, size: 4, type: "falling" },
     { id: "p51", x: 290, y: -530, size: 2, type: "moving-h", range: 120, speed: 70 },
     { id: "p52", x: 290, y: -630, size: 2, type: "moving-h", range: 120, speed: 70 },
+    { id: "p53", x: 890, y: 910, size: 3, type: "solid", material: "wood" },
+    { id: "p54", x: 1170, y: 770, size: 3, type: "solid", material: "wood" },
+    { id: "p55", x: 1320, y: 610, size: 3, type: "solid", material: "wood" },
+    { id: "p56", x: 620, y: 430, size: 3, type: "solid", material: "wood" },
+    { id: "p57", x: 1160, y: 320, size: 3, type: "solid", material: "wood" },
+    { id: "p58", x: 1450, y: -90, size: 3, type: "solid", material: "wood" },
+    { id: "p59", x: 720, y: -250, size: 3, type: "solid", material: "wood" },
+    { id: "p60", x: 450, y: -380, size: 2, type: "falling" },
   ],
 
-  // Zwei Wandspalten (x=410/x=490) bilden zusammen einen Kamin zum Wandsprung-
-  // Klettern von der Plattform-Reihe bei y=550 hoch zur Reihe bei y=320. Eine
-  // einzelne Wand reicht dafür nicht: ohne Gegenwand zum Abfangen fällt man nach
-  // dem Absprung wieder zurück, statt Höhe zu gewinnen.
+  // Eine einzelne Wand: kein kletterbarer Kamin, sondern ein Wandsprung
+  // (Doppelsprung) als Abkürzung/Zusatzoption an dieser Stelle.
   walls: [
     { id: "w0", x: 490, y: 130 },
     { id: "w1", x: 490, y: 240 },
     { id: "w2", x: 490, y: 340 },
     { id: "w3", x: 490, y: 430 },
-    { id: "w4", x: 410, y: 130 },
-    { id: "w5", x: 410, y: 240 },
-    { id: "w6", x: 410, y: 340 },
-    { id: "w7", x: 410, y: 430 },
   ],
 
   groundEnemies: [
