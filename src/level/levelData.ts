@@ -45,12 +45,13 @@ export const DEFAULT_LEVEL: LevelData = {
     { id: "p52", x: 290, y: -630, size: 2, type: "moving-h", range: 120, speed: 70 },
     { id: "p53", x: 890, y: 910, size: 3, type: "solid", material: "wood" },
     { id: "p54", x: 1170, y: 770, size: 3, type: "solid", material: "wood" },
-    { id: "p55", x: 1320, y: 610, size: 3, type: "solid", material: "wood" },
     { id: "p56", x: 620, y: 430, size: 3, type: "solid", material: "wood" },
     { id: "p57", x: 1160, y: 320, size: 3, type: "solid", material: "wood" },
     { id: "p58", x: 1450, y: -90, size: 3, type: "solid", material: "wood" },
     { id: "p59", x: 720, y: -250, size: 3, type: "solid", material: "wood" },
     { id: "p60", x: 450, y: -380, size: 2, type: "falling" },
+    { id: "p61", x: 1340, y: 630, size: 3, type: "solid", material: "wood" },
+    { id: "p62", x: 1110, y: 220, size: 3, type: "solid", material: "wood" },
   ],
 
   // Eine einzelne Wand: kein kletterbarer Kamin, sondern ein Wandsprung
