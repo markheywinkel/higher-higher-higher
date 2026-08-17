@@ -22,8 +22,9 @@ export const PLAYER = {
   WALL_JUMP_LOCK_MS: 160,
   WALL_COYOTE_MS: 170,
   JUMP_BUFFER_MS: 170,
-  KNOCKBACK_X: 220,
-  KNOCKBACK_Y: -260,
+  // Rückschlag um 30% erhöht (Basiswerte waren 220 / -260).
+  KNOCKBACK_X: 286,
+  KNOCKBACK_Y: -338,
   KNOCKBACK_LOCK_MS: 220,
   WIDTH: 40,
   HEIGHT: 54,

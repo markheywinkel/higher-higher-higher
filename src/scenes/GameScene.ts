@@ -1,5 +1,13 @@
 import Phaser from "phaser";
-import { loadSprites, loadGameOverScreen, loadWinScreen, loadBackground, loadAudio, createAnimations } from "../assets";
+import {
+  loadSprites,
+  loadGameOverScreen,
+  loadWinScreen,
+  loadPauseScreen,
+  loadBackground,
+  loadAudio,
+  createAnimations,
+} from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
 import { createMuteButton } from "../ui/muteButton";
 import { ensureMusicPlaying, playSfx } from "../audio";
@@ -77,6 +85,7 @@ export class GameScene extends Phaser.Scene {
     loadSprites(this);
     loadGameOverScreen(this);
     loadWinScreen(this);
+    loadPauseScreen(this);
     loadBackground(this);
     // Im Hauptspiel bereits von StartScene geladen (Loader überspringt bereits
     // gecachte Keys); im Editor-Testmodus ist GameScene aber der Erstzugriff.
@@ -386,31 +395,16 @@ export class GameScene extends Phaser.Scene {
     const cam = this.cameras.main;
     cam.setZoom(1);
 
-    const bg = this.add
-      .rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2, GAME_WIDTH, GAME_HEIGHT, 0x000000, 0.6)
+    const screen = this.add
+      .image(GAME_WIDTH / 2, GAME_HEIGHT / 2, "screen-pause")
+      .setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
       .setScrollFactor(0)
       .setDepth(DEPTH.UI + 2);
-    const title = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 40, "PAUSE", {
-        fontFamily: "system-ui, sans-serif",
-        fontSize: "120px",
-        fontStyle: "bold",
-        color: "#ffffff",
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(DEPTH.UI + 3);
-    const subtitle = this.add
-      .text(GAME_WIDTH / 2, GAME_HEIGHT / 2 + 80, "Enter drücken zum Fortsetzen", {
-        fontFamily: "system-ui, sans-serif",
-        fontSize: "36px",
-        color: "#cccccc",
-      })
-      .setOrigin(0.5)
-      .setScrollFactor(0)
-      .setDepth(DEPTH.UI + 3);
 
-    this.pauseOverlay = this.add.container(0, 0, [bg, title, subtitle]);
+    // Tiefe muss auf dem Container selbst gesetzt werden: ein Container übernimmt
+    // nicht automatisch die Tiefe seiner Kinder für die globale Sortierung, sonst
+    // würden Plattformen/Gegner (Tiefe 2-4) durch das Pause-Bild hindurchscheinen.
+    this.pauseOverlay = this.add.container(0, 0, [screen]).setDepth(DEPTH.UI + 2);
   }
 
   private hidePauseOverlay(): void {

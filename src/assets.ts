@@ -87,6 +87,10 @@ export function loadWinScreen(scene: Phaser.Scene): void {
   scene.load.image("screen-win", "screens/win.png");
 }
 
+export function loadPauseScreen(scene: Phaser.Scene): void {
+  scene.load.image("screen-pause", "screens/pause.png");
+}
+
 export function loadBackground(scene: Phaser.Scene): void {
   scene.load.image("background-sky", "backgrounds/sky.png");
 }
