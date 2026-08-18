@@ -2,7 +2,10 @@
 <html lang="de">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
     <title>Higher, higher, higher</title>
     <style>
       * {
@@ -48,9 +51,28 @@
         line-height: 0;
         width: min(900px, 92vw);
         aspect-ratio: 16 / 9;
+        touch-action: none;
       }
       canvas {
         image-rendering: pixelated;
+        touch-action: none;
+      }
+      #rotate-hint {
+        display: none;
+        width: min(900px, 92vw);
+        margin-bottom: 12px;
+        padding: 8px 14px;
+        background: #2a2410;
+        border: 1px solid #4a3f1a;
+        border-radius: 8px;
+        color: #ffcc33;
+        font-size: 13px;
+        text-align: center;
+      }
+      @media (orientation: portrait) and (max-height: 700px) {
+        #rotate-hint {
+          display: block;
+        }
       }
       #editor-link {
         position: fixed;
@@ -95,10 +117,14 @@
       <h1>Higher, higher, higher</h1>
       <p>Ein Jump'n'Run-Testspiel von <a href="https://www.markheywinkel.de" target="_blank" rel="noopener">Mark Heywinkel</a></p>
     </header>
+    <div id="rotate-hint">📱 Am besten im Querformat spielen</div>
     <div id="app"></div>
     <div class="note">
       <h2>Spielanleitung</h2>
-      <p>Pfeiltasten zum Bewegen, Shift zum Sprinten, Leertaste zum Springen, Enter für Pause.</p>
+      <p>
+        Pfeiltasten zum Bewegen, Shift zum Sprinten, Leertaste zum Springen, Enter für Pause. Auf
+        Touch-Geräten erscheinen automatisch Steuerungs-Buttons im Spiel.
+      </p>
     </div>
     <div class="note">
       <h2>Notiz</h2>

@@ -10,6 +10,8 @@ import {
 } from "../assets";
 import { showButtonScreen } from "../ui/buttonScreen";
 import { createMuteButton } from "../ui/muteButton";
+import { createPauseButton } from "../ui/pauseButton";
+import { TouchControls, isTouchDevice } from "../ui/touchControls";
 import { ensureMusicPlaying, playSfx } from "../audio";
 import { Player, type PlayerInput } from "../entities/Player";
 import { SolidPlatform } from "../entities/platforms/SolidPlatform";
@@ -57,6 +59,7 @@ export class GameScene extends Phaser.Scene {
   private keyEnter!: Phaser.Input.Keyboard.Key;
   private pauseOverlay?: Phaser.GameObjects.Container;
   private lava!: Phaser.GameObjects.TileSprite;
+  private touchControls?: TouchControls;
 
   private player!: Player;
   private cursors!: Phaser.Types.Input.Keyboard.CursorKeys;
@@ -128,6 +131,12 @@ export class GameScene extends Phaser.Scene {
     this.setupCamera();
     this.setupInput();
     createMuteButton(this);
+    createPauseButton(this, () => {
+      if (this.runState === "playing" || this.runState === "paused") this.togglePause();
+    });
+    if (isTouchDevice(this)) {
+      this.touchControls = new TouchControls(this);
+    }
   }
 
   private buildBackground(): void {
@@ -430,14 +439,16 @@ export class GameScene extends Phaser.Scene {
   }
 
   private updatePlaying(time: number): void {
+    const touch = this.touchControls;
     const input: PlayerInput = {
-      left: this.cursors.left.isDown || this.keyA.isDown,
-      right: this.cursors.right.isDown || this.keyD.isDown,
-      run: this.keyShift.isDown,
+      left: this.cursors.left.isDown || this.keyA.isDown || (touch?.isLeftDown ?? false),
+      right: this.cursors.right.isDown || this.keyD.isDown || (touch?.isRightDown ?? false),
+      run: this.keyShift.isDown || (touch?.isRunDown ?? false),
       jumpPressed:
         Phaser.Input.Keyboard.JustDown(this.cursors.up) ||
-        Phaser.Input.Keyboard.JustDown(this.keySpace),
-      jumpHeld: this.cursors.up.isDown || this.keySpace.isDown,
+        Phaser.Input.Keyboard.JustDown(this.keySpace) ||
+        (touch?.consumeJumpJustPressed() ?? false),
+      jumpHeld: this.cursors.up.isDown || this.keySpace.isDown || (touch?.isJumpDown ?? false),
     };
 
     this.player.update(input, time);

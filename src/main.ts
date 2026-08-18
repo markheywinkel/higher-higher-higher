@@ -14,6 +14,10 @@ const game = new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH,
   },
+  // Mehrere gleichzeitige Touch-Punkte (z.B. Bewegen + Springen mit zwei Fingern).
+  input: {
+    activePointers: 3,
+  },
   physics: {
     default: "arcade",
     arcade: {
